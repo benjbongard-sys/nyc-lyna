@@ -20,13 +20,7 @@ for(let i=0;i<dataDates.length;i++){
     place:'test'+(i+1),kind:'food',status:'proposed',detail:'Synthetic lunch'}
  ]};
 }
-const approved={schema:'noux-approved-plan-v1',revision:'synthetic1',places,days,
- alternatives:{friday_if_bridge_done_or_rain:[
-  {id:'approved_20261127_00',start:'10:00',end:'11:00',title:'Friday alternative',
-   place:'test12',kind:'walk',status:'proposed',detail:'Synthetic alternate'},
-  {id:'approved_20261127_01',start:'12:00',end:'13:00',title:'Lunch unchanged',
-   place:'test13',kind:'food',status:'proposed',detail:''}
- ]}};
+const approved={schema:'noux-approved-plan-v1',revision:'synthetic1',places,days,alternatives:{}};
 function db(entries={}){
  const state={...entries};
  return {getItem:k=>Object.hasOwn(state,k)?state[k]:null,
@@ -70,14 +64,14 @@ function makeApp(storage){
  assert(!ciphertext.includes('Approved first stop'),'No plaintext itinerary in storage');
  assert.equal(api.install(),true);
  const choices=app.window.NYC_DATA.CHOICES;
- assert.equal(choices.length,1);
- assert.equal(choices[0].id,'c12','Old decision cards must be archived');
+ assert.equal(choices.length,0,'Archived decisions must not suggest replacing approved Friday route');
  assert.equal(app.window.NYC_DATA.P.noux_test2.name,'Test place 2');
  assert.equal(app.window.NYC_PLAN.day('mon',{}).filter(x=>x.id==='old_dinner').length,0,'Old proposed itinerary removed');
  assert(app.window.NYC_PLAN.day('tue',{}).some(x=>x.id==='custom_123'),'User custom stop preserved');
- assert.equal(app.window.NYC_PLAN.day('fri',{}).find(x=>x.id==='approved_20261127_00').title,'Friday alternative',
-  'Native Friday selection chooses weather alternate from saved shared choices');
- assert.equal(app.window.NYC_PLAN.day('fri',{c12:'bridge'}).find(x=>x.id==='approved_20261127_00').title,'Approved first stop 4');
+ assert.equal(app.window.NYC_PLAN.day('fri',{}).find(x=>x.id==='approved_20261127_00').title,'Approved first stop 4',
+  'Approved Friday route is fixed even with stale saved choices');
+ assert.equal(app.window.NYC_PLAN.day('fri',{c12:'village'}).find(x=>x.id==='approved_20261127_00').title,'Approved first stop 4',
+  'A stale Friday West Village choice must never replace DUMBO and the bridge');
  assert.equal(api.install(),true,'Idempotent install');
  assert.equal(app.sent.filter(e=>e==='noux:local-change').length,1,'Shared sync event published once');
  const invalid={...approved,schema:'not-approved'};
@@ -92,5 +86,5 @@ function makeApp(storage){
  const prop=JSON.stringify(['noux_trip_revision_v1']);
  assert.equal(fields[prop],ciphertext,'Encrypted manifest must sync as one indivisible record');
  assert(!Object.keys(fields).some(k=>k.includes('NOUXPLAN1')),'Ciphertext is a value, not a key');
- console.log('Approved private itinerary PASS: import, encryption, sync atomicity, 5 day override, custom stops, native Friday fallback, reload and invalid-file protection.');
+ console.log('Approved private itinerary PASS: import, encryption, sync atomicity, 5 day override, custom stops, fixed Friday, reload and invalid-file protection.');
 })().catch(e=>{console.error(e);process.exitCode=1});
