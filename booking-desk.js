@@ -15,7 +15,7 @@ const ITEMS=[
  ['wed','05','Whitney Museum · 13:10','ticket','Museum admission.','https://whitney.org/visit'],
  ['wed','13','Louie Vega · Superior Ingredients · 22:00','ticket','Indoor The Room, not The Roof; purchase entry separately.','https://ra.co/events/2567360'],
  ['thu','03','Mercer Labs · 11:30','ticket','Essential museum visit; confirm Thursday admission.','https://mercerlabs.com/'],
- ['thu','04',"Sadie's Seaport · 13:10",'reservation','Thanksgiving brunch announced 10:00–15:00; table not yet confirmed.','https://www.sadies.nyc/'],
+ ['thu','04',"Sadie's Seaport · 13:20",'reservation','Thanksgiving brunch announced 10:00–15:00; table not yet confirmed.','https://www.sadies.nyc/'],
  ['thu','05','DAYDREAM · Balloon Museum · 14:30','ticket','Thanksgiving-week programme advertised; select admission.','https://tickets.balloonmuseum.world/newyork/'],
  ['thu','07','Colbo Next Door · 17:00','hours','Thanksgiving opening is unverified; keep conditional.','https://shop.colbo.nyc/'],
  ['thu','09','Nubeluz · 19:30','reservation','Preferred rooftop table; not booked yet.','https://www.nubeluzbyjose.com/'],
