@@ -54,6 +54,12 @@ assert(w.NOUX_TRIP_TOOLS.nativeSettings(),'Recognises original Trip Settings');
 for(const callback of docListeners.click||[])callback({target:{closest:selector=>selector==='.settings-button'?{}:null}});
 while(raf.length)raf.shift()();
 assert(!trigger.hidden,'Settings-only sync shortcut becomes visible when native gear opens');
+w.innerWidth=390;w.innerHeight=690;
+for(const callback of docListeners.click||[])callback({target:{closest:selector=>selector==='.settings-button'?{}:null}});
+while(raf.length)raf.shift()();
+assert(Number.parseInt(trigger.style.top,10)>=64,'iPhone Sync entry must not be placed under the notch');
+assert(Number.parseInt(trigger.style.left,10)<390,'iPhone Sync entry stays inside the viewport');
+w.innerWidth=1200;w.innerHeight=800;
 trigger.click(); // actual user interaction with the body-owned Settings accessory
 assert(!doc.getElementById('noux-trip-tools').hidden,'Settings tools open');
 assert.equal(root.children.length,1,'Settings portal does not mutate React');
