@@ -51,7 +51,7 @@ This repository had earlier unencrypted revisions. Replacing the current branch 
 ## Deployed features
 
 - Cinematic unlock animation; itinerary encrypted at rest.
-- Complete dynamic daily schedule, choices and travel estimates, and independently recorded bookings.
+- Approved five-day daily schedule, transfer estimates, optional custom stops and independently confirmed booking statuses. Old itinerary decisions no longer appear in the final plan.
 - Global search (Cmd/Ctrl+K) across all itinerary stops and wishes.
 - All-stops MapLibre vector map using OpenFreeMap, with selected visits, alternatives and custom pins. No requests to blocked OpenStreetMap volunteer tile servers.
 - Departure-day itinerary returns to the hotel for stored luggage before the **arranged guided group coach at approximately 17:00 on Friday 27 November**. The exact lobby boarding time is subject to the travel organiser.
@@ -64,11 +64,11 @@ This repository had earlier unencrypted revisions. Replacing the current branch 
 
 ## Food wishlist additions (21 November 2026)
 
-The public `food-wishlist.js` extension adds up to 13 curated NYC food suggestions to the **existing** native `food` wishlist category **only after the encrypted itinerary unlocks**. It retains existing wishlist entries and their priorities, recognises common naming variants to avoid duplicates, and marks four newly introduced classics as core: Katz's, Shake Shack, Joe's Pizza and L'Industrie. Other new food entries are optional, with no preselected day.
+The public `food-wishlist.js` extension originally added 13 curated NYC food suggestions and now maintains **15 verified-address profiles**, including the final Golden Diner and Sadie's additions to the **existing** native `food` wishlist category **only after the encrypted itinerary unlocks**. It retains existing wishlist entries and their priorities, recognises common naming variants to avoid duplicates, and marks four newly introduced classics as core: Katz's, Shake Shack, Joe's Pizza and L'Industrie. Other new food entries are optional, with no preselected day.
 
 The enhancer does not modify the ciphertext, local or shared user preferences, booked events, or the route planner. Both devices receive the same public list with the latest deployed code. The additions are not reservations, and menus, pricing and Thanksgiving hours must be checked before visiting.
 
-**Food place details (21 November 2026).** `food-wishlist.js` now carries branch-specific public metadata for all 13 picks: full street address, official site, published standard hours, known holiday exception, best-fit itinerary day, approximate visit duration and concise geographical advice. `food-guide.js` renders those details in a responsive panel **outside React's managed root**. Open it via the **Food details & hours** control while the native Wishlist is visible, by clicking a recognised Food wishlist card, or through **Explore → Food locations & hours**. Each listing offers directions and a current Google Maps hours search. No client API keys, background requests or new reservations are involved.
+**Food place details (21 November 2026).** `food-wishlist.js` now carries branch-specific public metadata for all 15 current picks: full street address, official site, published standard hours, known holiday exception, best-fit itinerary day, approximate visit duration and concise geographical advice. `food-guide.js` renders those details in a responsive panel **outside React's managed root**. Open it via the **Food details & hours** control while the native Wishlist is visible, by clicking a recognised Food wishlist card, or through **Explore → Food locations & hours**. Each listing offers directions and a current Google Maps hours search. No client API keys, background requests or new reservations are involved.
 
 Restaurant hours are **not** live opening guarantees. Official holiday notices are preserved: Russ & Daughters and Lobster Place are closed on Thanksgiving 26 November, while Katz's advertises an early 18:00 closing. Levain's pop-up and Magnolia Bakery have differing published regular hours across official sources; the guide explicitly discloses this. An unknown personally added Food wish receives a labelled "location/hours not verified" fallback with a search link rather than invented details. The guide never changes the native four-element Wishlist row or app's day plans.
 
@@ -80,7 +80,7 @@ After feedback on the growing UI, the duplicated **Travel Companion** has been r
 The deliberately small contextual structure is:
 
 - **Trip Settings → Shared / offline**: open the original settings gear in the NOUX header. A small portal-owned **Shared / offline** action appears next to its heading (on narrow phones it reads **Sync**). It opens a technical mini-section containing the real **Shared Trip** pairing/status controls, the previously existing **encrypted Offline Essentials** download/status/remove functionality, and a link to the existing **Departure & gifts** checklists. There is no permanent Shared Sync, Packing or Offline launcher while browsing. The native Settings React DOM is **not modified**.
-- **Explore → Guide our decisions**: a lightweight tour for Lyna (or Benjamin) that reads exactly the actual `NYC_DATA.CHOICES` list. It displays the current selection, delegates a choice to the original React **Decisions** card, and tracks independent reviewed/decide-later progress in the existing choice journal. The progress already syncs between paired devices. It does not duplicate GO, weather, maps, bookings or any separate itinerary state.
+- **Explore → Approved trip overview**: once the five-day plan is final, this panel shows the next planned stop, the five approved days, remaining booking checks and shortcuts to Map, Wishlist, Routes and Tickets. Legacy Decisions, pace modes and second-chance selections are retired. The old guided-choices component remains only as a compatibility fallback when no approved plan is active.
 - **Wishlist → Food card**: click the existing Food wish to see verified branches, addresses, published hours, holiday warnings and one-tap directions. The full Food guide is also accessible from **Explore**, but it has no permanent floating button.
 - **Itinerary / Map / MTA**: retain their already existing schedules, walking/subway directions, train predictions and booked/proposed statuses. No duplicate GO or forecast screen is loaded.
 - **Explore** is the remaining original floating shortcut. All other new features are contextual, so the visitor does not have to navigate a pile of overlapping buttons.
@@ -95,7 +95,7 @@ The code intentionally uses **body-owned modals and settings-only overlay contro
 
 The public `choice-orchestrator.js` and `day-audit.js` layers run only **after** decryption and read the existing private itinerary; they do not embed private reservations or the passphrase.
 
-- The legacy, pre-import fallback offered several Wednesday routes; once the approved private itinerary is activated, its selected Wednesday route is fixed and the old route choices no longer appear.
+- Legacy route choices are superseded by the directly deployed public approved-week schedule. Wednesday and Friday remain fixed in the selected sightseeing plan.
 - The optimiser uses tighter photo and focused-gallery durations, clusters nearby stops, inserts honest transfer buffers, and retains dismissed choices in the Explorer's Second Chances / Route Checks sections.
 - The arrival-day booked cruise keeps a 60-minute pier transfer and 30-minute boarding window free of speculative extras. Exact pier and actual travel times are read from the booking, not inferred.
 - Holiday closures are screened for selected museums. A relaxed parade viewing window is preserved; it does not promise early front-row viewing.
@@ -107,7 +107,7 @@ The public `choice-orchestrator.js` and `day-audit.js` layers run only **after**
 ## Final-day coach, sunrise and encrypted checklists
 
 - **Friday 27 November:** breakfast at the hotel from 07:00 to 10:00; check out **before 12:00**, leaving suitcases with hotel reception. The booked group transfer is by coach with a French-speaking guide, **approximately 17:00** from the hotel to JFK Terminal 1. The planner puts guests in the lobby by 16:45. This supersedes the earlier speculative noon/15:50 pickup. The private encrypted itinerary retains actual flight booking details.
-- **Legacy fallback only:** an optional sunrise walk appears before importing the final approved itinerary. The approved five-day plan disables that optional early-morning excursion and uses the privately selected daytime crossing instead.
+- The approved five-day itinerary does not include an early sunrise crossing. Friday's daytime DUMBO and Brooklyn Bridge route is fixed.
 - After unlock, **Trip Settings → Shared / offline → Open checklists** opens the existing encrypted **Departure & gifts** checklist. It has separate Lyna/Benjamin ticks, editable souvenirs and Bought/Packed markers, curated shops and live Google Maps search. There is no extra permanent packing launcher.
 - All ticks and shopping notes are saved **encrypted locally with AES-GCM**. After the two phones have been paired, changes also synchronise through encrypted Cloudflare Durable Object storage, preserving Benjamin's and Lyna's independent checkboxes. Encrypted export/import remains available as a separate backup.
 - The shopping suggestions and France customs caveats are informational. Store inventory, special holiday hours, carrier baggage conditions and customs exemptions need verification before purchase.
