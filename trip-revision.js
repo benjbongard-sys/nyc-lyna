@@ -149,9 +149,34 @@ function install(){
  INITIALISED=true;
  return true;
 }
+let DECORATION_OBSERVER=null;
+function decorate(){
+ if(!DOC||typeof document==='undefined'||!document.body)return false;
+ document.body.classList?.add('noux-final-approved');
+ const hideOldDecisions=()=>{
+  const root=document.getElementById?.('root');
+  if(!root)return;
+  for(const button of root.querySelectorAll?.('button')||[]){
+   const name=String(button.textContent||'').trim();
+   if(/^(?:lyna.s decisions|make the decisions|choose our version of new york)$/i.test(name)){
+    button.hidden=true;
+    button.setAttribute?.('aria-hidden','true');
+   }
+  }
+ };
+ hideOldDecisions();
+ if(!DECORATION_OBSERVER&&typeof MutationObserver!=='undefined'){
+  const root=document.getElementById?.('root');
+  if(root){
+   DECORATION_OBSERVER=new MutationObserver(hideOldDecisions);
+   DECORATION_OBSERVER.observe(root,{childList:true,subtree:true});
+  }
+ }
+ return true;
+}
 function status(){
  return {ready:!!KEY,active:!!DOC,installed:INITIALISED,revision:DOC?.revision||'',error:ERROR,
   synced:!!window.NOUX_SYNC?.getStatus?.()?.paired};
 }
-window.NOUX_PLAN_REVISION={prepare,install,importText,importFile,status,active:()=>!!DOC,version:'2026.11.22-direct2'};
+window.NOUX_PLAN_REVISION={prepare,install,decorate,importText,importFile,status,active:()=>!!DOC,version:'2026.11.22-direct2'};
 })();
