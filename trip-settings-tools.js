@@ -123,7 +123,7 @@ function render(){
  approved.append(importAction,input);
  if(IMPORT_STATUS)approved.append(el('small','noux-trip-tool-state',IMPORT_STATUS));
  if(plan.active&&!plan.installed)approved.append(button('View updated itinerary',()=>location.reload(),'noux-trip-tools-primary'));
- if(plan.active&&plan.installed)approved.append(el('p',null,'Friday route: choose Brooklyn Bridge or West Village in the native Decisions tab. Your booking and packing controls remain available.'));
+ if(plan.active&&plan.installed)approved.append(el('p',null,'Friday is fixed: DUMBO → Brooklyn Bridge → Golden Diner → Rockefeller Center → airport transfer. Your booking and packing controls remain available.'));
  const cache=el('section','noux-trip-tool-row');
  cache.append(el('h3',null,'Offline essentials'),el('p',null,'Save public app files and the encrypted trip vault on each phone. Map tiles and real-time MTA arrivals still need internet.'));
  const ready=OFFLINE?.ready||OFFLINE?.ok&&OFFLINE.vaultSaved&&OFFLINE.failed?.length===0;
