@@ -225,6 +225,10 @@
     // Informational Food guide is separate from the React root and never
     // mutates private itinerary, booked stops, or passphrase handling.
     if(window.NOUX_FOOD_GUIDE){try{window.NOUX_FOOD_GUIDE.install()}catch(_){}}
+    // Native Trip Settings owns these body-only helpers; React stays untouched.
+    if(window.NOUX_BOOKING_DESK){try{window.NOUX_BOOKING_DESK.install()}catch(_){}}
+    if(window.NOUX_ROUTE_GUIDE){try{window.NOUX_ROUTE_GUIDE.install()}catch(_){}}
+
     // Only contextual helpers remain, outside React and after first paint.
     // Shared sync and offline are accessible through the existing Trip Settings;
     // Lyna's optional guided choices are accessible through Explore.
