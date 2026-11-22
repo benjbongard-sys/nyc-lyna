@@ -383,5 +383,5 @@
   trigger.removeAttribute('aria-hidden');
   return true;
  }
- window.NOUX_EXPLORER={install:install,ensure:ensure,version:'2026.11.22-mobile1',mode:getMode};
+ window.NOUX_EXPLORER={install:install,ensure:ensure,version:'2026.11.22-explore2',mode:getMode};
 })();
