@@ -11,7 +11,7 @@ const storage={getItem:k=>state[k]||null,setItem:(k,v)=>state[k]=String(v)};
 for(const name of files)vm.runInNewContext(source(name),{window:win,localStorage:storage,document:{},Object,Array,String,Set,Map,JSON,Date,Math,Number,Intl},{filename:name});
 const plan=win.NOUX_APPROVED_WEEK,booking=win.NOUX_BOOKING_DESK,food=win.NOUX_FOOD_WISHLIST,route=win.NOUX_ROUTE_GUIDE;
 const dates={mon:'2026-11-23',tue:'2026-11-24',wed:'2026-11-25',thu:'2026-11-26',fri:'2026-11-27'};
-assert.equal(plan.revision,'2026-11-23-pier79-photos','Approved fixed-route revision');
+assert.equal(plan.revision,'2026-11-23-bookings-confirmed','Approved fixed-route revision');
 assert.equal(Object.keys(plan.days).length,5,'Exactly five approved days');
 const all=[],seen=new Set(),missing=[],timeErrors=[];
 const mins=t=>Number(t.slice(0,2))*60+Number(t.slice(3,5));
@@ -43,6 +43,20 @@ assert(!friday.some(e=>/sunrise|weather.day/i.test(e.title)),'No legacy sunrise/
 assert(friday.find(e=>/Golden Diner/.test(e.title)),'Friday lunch stays fixed');
 const thursday=plan.days[dates.thu].events;
 assert(thursday.some(e=>/Mercer Labs/.test(e.title))&&thursday.some(e=>/DAYDREAM/.test(e.title)),'Both selected immersive exhibitions Thursday');
+const confirmEvent=id=>all.find(e=>e.id===id);
+for(const [id,label] of [
+ ['approved_20261124_01','Butterfly Vivarium'],['approved_20261124_06','Hudson VU'],
+ ['approved_20261126_03','Mercer Labs']]){
+ const event=confirmEvent(id);
+ assert(event&&event.status==='booked',label+' is newly booked in the approved plan');
+ assert(booking.confirmed(id),label+' is booked in the ticket desk as well');
+ assert(tracked.find(b=>b.id===id)?.kind==='booked',label+' is not listed as a pending ticket');
+}
+const louie=confirmEvent('approved_20261125_13'),louieBooking=tracked.find(b=>b.id===louie?.id);
+assert(louie?.status==='ticket-to-check'&&/WAITLISTED.*NOT confirmed/i.test(louie.detail),'Waitlisted Louie Vega never appears as confirmed admission');
+assert(louieBooking?.kind==='waitlist'&&louieBooking.confirmed===false,'Waitlist distinct from an issued ticket');
+assert.equal(booking.status().waitlisted,1,'One active waitlist reported');
+assert.equal(booking.status().bookedAlready,6,'Six actual bookings including pre-existing reservations');
 assert(thursday.some(e=>/Sadie.s Seaport/.test(e.title)),'Thanksgiving Sadies lunch remains on Thursday');
 assert(!all.some(e=>/Le Bain|River Café|Macy.s parade|Soul in the Horn/i.test(e.title)),'Retired itinerary choices did not return');
 const cruise=plan.days[dates.mon].events.find(e=>/Golden Hour harbour cruise/.test(e.title));
