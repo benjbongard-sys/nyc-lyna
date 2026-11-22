@@ -579,3 +579,45 @@ body.noux-final-approved .mainnav button[hidden]{display:none!important}
 @media(max-height:500px) and (orientation:landscape){
  #noux-explorer-launch.noux-explorer-launch{bottom:calc(15px + env(safe-area-inset-bottom,0px))!important}
 }
+
+
+/* NOUX Explorer · iPhone full-viewport sheet fix (22 Nov).
+   The previous bottom-anchored drawer collapsed to a thin empty strip
+   if rendering threw. Use a real scrollable viewport overlay on mobile. */
+@media (max-width:760px){
+  body.noux-explorer-open{overflow:hidden!important}
+  #noux-explorer-drawer.noux-explorer-drawer:not([hidden]){
+    position:fixed!important;
+    inset:0!important;
+    top:0!important;right:0!important;bottom:0!important;left:0!important;
+    width:100%!important;
+    height:100vh!important;
+    height:100dvh!important;
+    max-height:none!important;
+    min-height:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    box-sizing:border-box;
+    border:0!important;
+    border-radius:0!important;
+    z-index:3500!important;
+    padding:calc(14px + env(safe-area-inset-top,0px)) 17px calc(26px + env(safe-area-inset-bottom,0px))!important;
+    background:#141c28!important;
+    animation:none!important;
+    transform:none!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+  #noux-explorer-drawer.noux-explorer-drawer[hidden]{display:none!important}
+  #noux-explorer-drawer .noux-explorer-head{
+    position:sticky;
+    top:0;
+    z-index:2;
+    padding:10px 0 15px;
+    background:#141c28;
+  }
+  #noux-explorer-drawer .noux-explorer-close{min-height:44px;min-width:44px}
+}
