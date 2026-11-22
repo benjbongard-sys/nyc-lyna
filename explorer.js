@@ -256,7 +256,7 @@
    if(key){
     var upcoming=plans[key].find(function(e){var end=minute(e.end);if(end<minute(e.start))end+=1440;return end>=now});
     live.append(element('small',null,'NEXT STOP · NYC '+parts.hour+':'+parts.minute),element('b',null,upcoming?upcoming.start+' · '+upcoming.title:'All scheduled stops completed'));
-    if(upcoming)live.append(press('noux-explorer-link','View today’s plan',function(){open=false;drawer.hidden=true;goTo(key)}));
+    if(upcoming)live.append(press('noux-explorer-link','View today’s plan',function(){closeDrawer();goTo(key)}));
    }else{
     var first=new Date(((DATA.DATES||{}).mon||'')+'T12:00:00Z').getTime(),diff=Number.isFinite(first)?Math.ceil((first-Date.now())/86400000):0;
     live.append(element('small',null,'NEW YORK LOCAL · '+parts.hour+':'+parts.minute),element('b',null,diff>0?diff+' days until our New York adventure':'Our NYC itinerary is ready to explore'));
@@ -319,10 +319,10 @@
     }
    }
    var controls=element('div','noux-explorer-actions');
-   controls.append(press('noux-explorer-primary','Open wish list',function(){var b=Array.from(document.querySelectorAll('.topbar .mainnav button')).find(function(x){return /wish list/i.test(x.textContent)});if(b)b.click();open=false;drawer.hidden=true}),press('noux-explorer-secondary','Add a stop',function(){var b=document.querySelector('.top-add-stop');if(b)b.click();open=false;drawer.hidden=true}));
-   if(window.NOUX_FOOD_GUIDE&&typeof window.NOUX_FOOD_GUIDE.open==='function')controls.append(press('noux-explorer-secondary','Food locations & hours',function(){window.NOUX_FOOD_GUIDE.open()}));
+   controls.append(press('noux-explorer-primary','Open wish list',function(){var b=Array.from(document.querySelectorAll('.topbar .mainnav button')).find(function(x){return /wish list/i.test(x.textContent)});if(b)b.click();closeDrawer()}),press('noux-explorer-secondary','Add a stop',function(){var b=document.querySelector('.top-add-stop');if(b)b.click();closeDrawer()}));
+   if(window.NOUX_FOOD_GUIDE&&typeof window.NOUX_FOOD_GUIDE.open==='function')controls.append(press('noux-explorer-secondary','Food locations & hours',function(){closeDrawer();window.NOUX_FOOD_GUIDE.open()}));
    // One optional guided mode for existing decisions, no duplicate dashboard.
-   if(window.NOUX_DECISION_GUIDE&&typeof window.NOUX_DECISION_GUIDE.open==='function')controls.append(press('noux-explorer-primary','Guide our decisions',function(){open=false;drawer.hidden=true;window.NOUX_DECISION_GUIDE.open()}));
+   if(window.NOUX_DECISION_GUIDE&&typeof window.NOUX_DECISION_GUIDE.open==='function')controls.append(press('noux-explorer-primary','Guide our decisions',function(){closeDrawer();window.NOUX_DECISION_GUIDE.open()}));
    drawer.replaceChildren(head,intro,live,modes,summary,track,help,daysHead,dayGrid,wishHead,radar,second,controls);
   }
   var root=document.getElementById('root');
