@@ -106,8 +106,16 @@ async function savePack(){
 }
 async function status(){
  const s=await caches.open(SHELL),v=await caches.open(VAULT);
- const [page,vault]=await Promise.all([s.match(shellUrl),v.match(vaultUrl.href)]);
- return {ready:!!(page&&vault),vaultSaved:!!vault,version:VERSION,publicCount:(await s.keys()).length,total:ASSETS.length};
+ // A shell + vault alone does not make an offline app. Check every essential
+ // asset before reporting ready. Missing scripts must never be hidden by
+ // a success badge, especially before travel.
+ const required=ASSETS.map(path=>new URL(path,prefix).href);
+ const hits=await Promise.all(required.map(url=>s.match(url)));
+ const vault=await v.match(vaultUrl.href);
+ const count=hits.filter(Boolean).length;
+ return {ready:!!vault&&count===ASSETS.length,vaultSaved:!!vault,
+  version:VERSION,publicCount:count,total:ASSETS.length,
+  failed:required.filter((url,i)=>!hits[i]).map(url=>url.replace(prefix.href,'./'))};
 }
 async function clearPack(){
  for(const name of await caches.keys()){
