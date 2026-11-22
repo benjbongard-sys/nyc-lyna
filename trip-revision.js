@@ -8,14 +8,13 @@
 if(window.NOUX_PLAN_REVISION)return;
 const STORE='noux_trip_revision_v1',PREFIX='NOUXPLAN1',AAD='NOUX-APPROVED-TRIP-V1',FORMAT='noux-approved-plan-v1';
 const DATES={mon:'2026-11-23',tue:'2026-11-24',wed:'2026-11-25',thu:'2026-11-26',fri:'2026-11-27'};
-const enc=new TextEncoder(),dec=new TextDecoder();
+const enc=new TextEncoder();
 const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
 let KEY=null,DOC=null,ERROR='',WRAPPED=null,INITIALISED=false;
 const toB64=a=>{let str='';for(let i=0;i<a.length;i+=8192)str+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(str)};
-const fromB64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 function validate(source){
  if(!source||source.schema!==FORMAT||!source.days||!source.places||
-    !source.alternatives||typeof source.days!=='object'||typeof source.places!=='object')throw Error('Select the approved NOUX itinerary file, not a generic JSON export.');
+    !source.alternatives||typeof source.days!=='object'||typeof source.places!=='object')throw Error('The published approved itinerary has an invalid format.');
  const loc=Object.entries(source.places);
  if(loc.length<12||loc.length>130)throw Error('Unexpected itinerary place count.');
  for(const [id,p] of loc){
@@ -49,22 +48,11 @@ async function prepare({key}={}){
  if(!key||!crypto?.subtle)return false;
  KEY=key;ERROR='';DOC=null;
  try{
-  // The latest final itinerary is now deployed automatically for both devices.
-  // No JSON import, old choices, or obsolete synced migration can replace it.
-  if(window.NOUX_APPROVED_WEEK){
-   DOC=validate(window.NOUX_APPROVED_WEEK);
-   return true;
-  }
-  // Compatibility only for a site that has not loaded the direct plan yet.
-  const record=localStorage.getItem(STORE);
-  if(!record)return true;
-  const match=/^NOUXPLAN1\.([A-Za-z0-9+/=]+)\.([A-Za-z0-9+/=]+)$/.exec(record);
-  if(!match)throw Error('Encrypted previous revision is invalid');
-  const buf=await crypto.subtle.decrypt(
-   {name:'AES-GCM',iv:fromB64(match[1]),additionalData:enc.encode(AAD)},KEY,fromB64(match[2]));
-  DOC=validate(JSON.parse(dec.decode(buf)));
+  // Fail closed: a missing published asset must not resurrect a historical itinerary.
+  if(!window.NOUX_APPROVED_WEEK)throw Error('The approved five-day asset is missing. Reconnect and reload NOUX.');
+  DOC=validate(window.NOUX_APPROVED_WEEK);
   return true;
- }catch(e){ERROR='Unable to activate final itinerary; previous plan remains available. '+(e?.message||'');return false}
+ }catch(e){ERROR='Final itinerary unavailable: '+(e?.message||'Unknown error');return false}
 }
 async function importText(text){
  if(!KEY)throw Error('Unlock NOUX with your regular passphrase first.');
