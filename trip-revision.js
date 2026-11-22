@@ -84,6 +84,59 @@ async function importFile(file){
  return importText(await file.text());
 }
 function minutes(s){return Number(s?.slice(0,2))*60+Number(s?.slice(3,5))}
+/* Geographic, scheduled leg estimates. Google Maps opens current navigation;
+   distances shown in NOUX itself are never represented as live traffic. */
+function distance(a,b){
+ if(!a||!b||![a.lat,a.lng,b.lat,b.lng].every(Number.isFinite))return NaN;
+ const rad=Math.PI/180,lat=(b.lat-a.lat)*rad,lon=(b.lng-a.lng)*rad;
+ const h=Math.sin(lat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(lon/2)**2;
+ return 12742*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function legsFor(events){
+ const p=window.NYC_DATA?.P||{},out=[],v=Array.isArray(events)?events:[];
+ for(let i=1;i<v.length;i++){
+  const from=v[i-1],to=v[i],a=p[from.place],b=p[to.place],km=distance(a,b);
+  if(!Number.isFinite(km)||km<0.07)continue;
+  const mode=a.kind==='airport'||b.kind==='airport'?'driving':km<=1.05?'walking':'transit';
+  const across=/brooklyn/i.test(a.area||'')!==/brooklyn/i.test(b.area||'');
+  const estimate=mode==='driving'?Math.max(45,Math.min(105,Math.ceil(36+km*1.6))):
+   mode==='walking'?Math.max(3,Math.ceil(km*1.32/4.6*60)+2):
+   Math.max(16,Math.min(78,Math.ceil(14+km*4.6+(across?9:0))));
+  let slack=to.kind==='travel'?minutes(to.end)-minutes(to.start):minutes(to.start)-minutes(from.end);
+  if(slack< -720)slack+=1440;
+  out.push({from,to,km:Math.round(km*100)/100,mode,estimate,slack,
+   warning:slack+4<estimate?'tight':'ok',source:'geographic estimate, not live'});
+ }
+ return out;
+}
+function priorPlace(target){
+ if(!DOC||!target?.startsWith('noux_'))return null;
+ const id=target.slice(5);
+ for(const key of Object.keys(DATES)){
+  const arr=DOC.days[DATES[key]]?.events||[];
+  for(let i=0;i<arr.length;i++){
+   if(arr[i].place!==id)continue;
+   for(let j=i-1;j>=0;j--)if(arr[j].place!==id)return 'noux_'+arr[j].place;
+  }
+ }
+ return null;
+}
+function directions(from,to,mode){
+ if(to==='noux_pier')return 'https://www.google.com/maps/search/?api=1&query='+
+   encodeURIComponent('Cruise boarding pier on ticket voucher New York');
+ const p=window.NYC_DATA?.P||{};
+ if(!p[to])return '';
+ let origin=from;
+ // The private core still asks for "sanctuary → current venue" on every card.
+ // Correct that call to the previous APPROVED stop, not the hotel.
+ if((from==='sanctuary'||from==='hotel')&&to?.startsWith('noux_'))
+  origin=priorPlace(to)||'noux_hotel';
+ if(!p[origin])origin='noux_hotel';
+ if(!p[origin]?.address||!p[to]?.address)return '';
+ return 'https://www.google.com/maps/dir/?'+new URLSearchParams({
+  api:'1',origin:p[origin].address,destination:p[to].address,
+  travelmode:mode==='walking'?'walking':mode==='driving'?'driving':'transit'});
+}
 function finalEvents(day,choices,previous){
  const date=DATES[day];if(!date||!DOC?.days?.[date])return previous;
  // The approved final-day route is fixed, with no alternative selection.
@@ -92,7 +145,9 @@ function finalEvents(day,choices,previous){
   const e={id:x.id,start:x.start,end:x.end,title:x.title,kind:x.kind,status:x.status,
    detail:String(x.detail||''),place:'noux_'+x.place};
   if(x.url)e.url=x.url;
-  if(x.status==='ticket-to-check'&&!/not booked|not purchased|to book/i.test(e.detail))
+  if(window.NOUX_BOOKING_DESK?.confirmed?.(e.id)){
+   e.status='booked';e.detail=(e.detail+' Manually confirmed in Tickets & bookings.').trim();
+  }else if(x.status==='ticket-to-check'&&!/not booked|not purchased|to book/i.test(e.detail))
    e.detail=(e.detail+' Ticket or reservation not yet confirmed.').trim();
   if(x.source_status==='conditional')e.detail=(e.detail+' Weather or holiday dependent.').trim();
   return e;
@@ -173,6 +228,8 @@ function install(){
  next.__nouxApprovedRevision=true;
  WRAPPED=next;PLAN.day=next;
  // Legacy choice-conflict warnings refer to retired Thursday decisions.
+ PLAN.legs=legsFor;
+ PLAN.routeUrl=directions;
  PLAN.findConflicts=()=>[];
  INITIALISED=true;
  return true;
