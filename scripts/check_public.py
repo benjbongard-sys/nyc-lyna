@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 root=Path('_site')
-required=['index.html','unlock.js','explorer.js','food-wishlist.js','food-guide.js','decision-guide.js','trip-settings-tools.js','trip-revision.js','sw.js','venues.js','choice-orchestrator.js','day-audit.js','departure-kit.js','sync-core.js','sync.js','styles.css','assets/private.vault.json','assets/photo-index.js','assets/photos/skyline.jpg']
+required=['index.html','unlock.js','explorer.js','food-wishlist.js','food-guide.js','decision-guide.js','trip-settings-tools.js','trip-revision.js','approved-week.js','sw.js','venues.js','choice-orchestrator.js','day-audit.js','departure-kit.js','sync-core.js','sync.js','styles.css','assets/private.vault.json','assets/photo-index.js','assets/photos/skyline.jpg']
 for f in required:
  assert (root/f).is_file(),f'Missing required offline asset {f}'
 vault=json.loads((root/'assets/private.vault.json').read_text())
@@ -18,4 +18,5 @@ for f in [root/'day-audit.js',root/'departure-kit.js',root/'sync-core.js',root/'
  for bad in ['private.vault.json','NOUX_PASSPHRASE','Sanctuary Hotel','132 W 47th','AF007']:
   assert bad not in text,f'Private booking detail leaked in {f.name}: {bad}'
 assert not (root/'approved_itinerary.json').exists(), 'Plaintext itinerary was included in the site'
+assert 'NOUX_PASSPHRASE' not in (root/'approved-week.js').read_text(), 'Never ship a passphrase'
 print('Security build PASS: first-party itinerary encrypted, no plain modules published, real venue photos local.')
