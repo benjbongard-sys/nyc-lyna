@@ -234,8 +234,10 @@
     if(window.NOUX_BOOKING_DESK){try{window.NOUX_BOOKING_DESK.install()}catch(_){}}
     if(window.NOUX_ROUTE_GUIDE){try{window.NOUX_ROUTE_GUIDE.install()}catch(_){}}
     if(window.NOUX_MAP_FILTER){try{window.NOUX_MAP_FILTER.install()}catch(_){}}
-    // The Explore shortcut is the only permanent on-screen action and must
-    // remain accessible in Safari, even if its first mount was missed.
+    // Recovery/basic mode previously skipped mounting Explore entirely.
+    // Initialise read-only after first paint if pre-render installation was
+    // skipped, while keeping the newly approved five-day plan immutable.
+    try{window.NOUX_EXPLORER?.install?.({displayOnly:true})}catch(_){}
     try{window.NOUX_EXPLORER?.ensure?.()}catch(_){}
     setTimeout(()=>{try{window.NOUX_EXPLORER?.ensure?.()}catch(_){}},850);
 
