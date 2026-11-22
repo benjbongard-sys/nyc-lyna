@@ -69,7 +69,7 @@ async function askWorker(type){
  if(!sw)throw Error('Offline support is still installing. Reload once while connected.');
  return new Promise((resolve,reject)=>{
   const channel=new MessageChannel();
-  const timer=setTimeout(()=>reject(Error('Offline cache did not respond. Please try again.')),30000);
+  const timer=setTimeout(()=>reject(Error('Offline cache did not respond. Please try again.')),type==='NOUX_OFFLINE_SAVE'?90000:30000);
   channel.port1.onmessage=event=>{
    clearTimeout(timer);channel.port1.close();
    if(event.data?.ok)resolve(event.data.result);
