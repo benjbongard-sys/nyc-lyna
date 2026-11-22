@@ -203,9 +203,10 @@
    var head=element('div','noux-explorer-head');
    var hbox=element('div');hbox.append(element('small','noux-kicker','NOUX / JOURNEY INTELLIGENCE'),element('h2',null,'Our New York, in motion.'));
    head.append(hbox,press('noux-explorer-close','×',function(){open=false;drawer.hidden=true;trigger.setAttribute('aria-expanded','false')}));
-   var intro=element('p','noux-explorer-intro','Five days, continuously adapting to our choices. All added stops are suggestions, never reservations.');
+   var intro=element('p','noux-explorer-intro',window.NOUX_PLAN_REVISION?.active()?'Five approved days. Extra wishlist places are suggestions only; confirmed plans are fixed.':'Five days, continuously adapting to our choices. All added stops are suggestions, never reservations.');
    var modes=element('div','noux-explorer-modes');
    modes.append(press(getMode()==='full'?'is-active':'','Full pace',function(){setMode('full');draw();rerender()}),press(getMode()==='original'?'is-active':'','Original',function(){setMode('original');draw();rerender()}));
+   if(window.NOUX_PLAN_REVISION?.active())modes.hidden=true;
    var summary=element('div','noux-explorer-metric');
    var ratio=wish.length?Math.round(done.length/wish.length*100):0;
    summary.append(element('strong',null,done.length+' / '+wish.length),element('span',null,'wishes represented in the current itinerary'));

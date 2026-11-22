@@ -509,3 +509,11 @@ body.noux-settings-open,body.noux-guide-open{overflow:hidden}
  .noux-guide-option{flex-direction:column}
  .noux-guide-option>.noux-guide-primary{align-self:flex-end}
 }
+
+/* Final approved itinerary: hide legacy decisions without touching React state. */
+body.noux-final-approved .aside-column,body.noux-final-approved .choices-preview,
+body.noux-final-approved .hero-actions button:nth-child(2),
+body.noux-final-approved .hero-facts span:last-child{display:none!important}
+body.noux-final-approved .columns{grid-template-columns:minmax(0,1fr)!important}
+body.noux-final-approved .route-column{min-width:0;max-width:none;width:100%}
+body.noux-final-approved .mainnav button[hidden]{display:none!important}

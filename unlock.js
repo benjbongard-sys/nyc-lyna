@@ -183,6 +183,9 @@
     const el=document.createElement('script');el.textContent=scripts[name]+`\n//# sourceURL=noux-private-${name}`;document.head.appendChild(el);
     if(name==='data.js'){try{window.NOUX_FOOD_WISHLIST?.install()}catch(_){/* optional food additions must never break unlock */}}
      if(name==='itinerary.js')attachCentennialParade();
+    if(name==='custom-stops.js'&&basicMode&&window.NOUX_PLAN_REVISION?.active()){
+     try{window.NOUX_PLAN_REVISION.install()}catch(_){}
+    }
     if(name==='custom-stops.js'&&!basicMode){
      // The stable venue/explorer layers can initialise here; choices, route
      // auditing and subway enhancements must not mutate state before React's
@@ -225,8 +228,9 @@
     // Only contextual helpers remain, outside React and after first paint.
     // Shared sync and offline are accessible through the existing Trip Settings;
     // Lyna's optional guided choices are accessible through Explore.
-    if(window.NOUX_DECISION_GUIDE){try{window.NOUX_DECISION_GUIDE.install()}catch(_){}}
+    if(!window.NOUX_PLAN_REVISION?.active()&&window.NOUX_DECISION_GUIDE){try{window.NOUX_DECISION_GUIDE.install()}catch(_){}}
     if(window.NOUX_TRIP_TOOLS){try{window.NOUX_TRIP_TOOLS.install()}catch(_){}}
+    try{window.NOUX_PLAN_REVISION?.decorate?.()}catch(_){}
     // If the full view genuinely crashes later, preserve a usable read-only
     // schedule without a repeating basic-mode login screen.
     setTimeout(()=>{if(!healthy())emergency('The visual page stopped rendering, but your private schedule is still available.','Delayed render failure; no browser data was erased.')},1600);
