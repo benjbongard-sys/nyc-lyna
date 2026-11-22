@@ -57,7 +57,7 @@ async function prepare({key}={}){
   }
   // Compatibility only for a site that has not loaded the direct plan yet.
   const record=localStorage.getItem(STORE);
-  if(!record)return false;
+  if(!record)return true;
   const match=/^NOUXPLAN1\.([A-Za-z0-9+/=]+)\.([A-Za-z0-9+/=]+)$/.exec(record);
   if(!match)throw Error('Encrypted previous revision is invalid');
   const buf=await crypto.subtle.decrypt(
