@@ -54,13 +54,21 @@ assert(!drawer.children.some(x=>x.textContent==='The five-day itinerary is still
  'Retired Decisions must not cause fallback or a blank drawer');
 launch.click();
 assert(drawer.hidden,'Close Explore restores main page');
-context.window.NOUX_DAY_AUDIT={pending:()=>{throw Error('Unrelated optional audit failure')}};
+context.window.NOUX_DAY_AUDIT={pending:()=>{throw Error('Retired route audit must not be called')}};
 launch.click();
-assert(!drawer.hidden,'Explore still opens after optional module failure');
-assert.equal(drawer.children.length,3,'A safe fallback replaces failed content, never the empty 40px strip');
-assert(drawer.children[1].textContent.includes('five-day itinerary'),'Fallback explains and links to the original itinerary');
+assert(!drawer.hidden,'Explore still opens despite retired audit data');
+assert(drawer.children.some(n=>n.textContent.includes('The five approved days')),
+ 'Approved Explore shows the real itinerary instead of legacy audit');
 launch.click();
 delete context.window.NOUX_DAY_AUDIT;
+const workingDay=context.window.NYC_PLAN.day;
+context.window.NYC_PLAN.day=()=>{throw Error('Simulated unexpected planner outage')};
+launch.click();
+assert(!drawer.hidden,'Explore still opens after genuine planner failure');
+assert.equal(drawer.children.length,3,'Safe fallback replaces failed content rather than the empty strip');
+assert(drawer.children[1].textContent.includes('five-day itinerary'),'Fallback links to original itinerary');
+launch.click();
+context.window.NYC_PLAN.day=workingDay;
 assert(explorer.ensure(),'Repeated ensure calls succeed without duplicates');
 assert.equal(body.children.filter(n=>n.id==='noux-explorer-launch').length,1,'No duplicate shortcuts');
 body.children=body.children.filter(n=>n!==launch);
