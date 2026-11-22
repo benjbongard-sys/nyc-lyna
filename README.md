@@ -18,6 +18,13 @@ The approved 23–27 November sightseeing route is now **loaded automatically as
 
 Both paired devices receive the new template from the published NOUX code on their next refresh/reopen. No booking was purchased or changed. The new native plan uses user-approved statuses: the previously booked cruise and cocktail are marked booked, while other tickets remain to be arranged by the travellers. There is no manual import, no Friday route choice, and no duplicate decisions panel. Public curated food details, maps, shared custom stops and gifts continue operating.
 
+## All-stops Map filter + iPhone Explore availability (22 November 2026)
+
+- The existing **All-stops Map** now has a compact **Scheduled / All** pin control, with **Scheduled** selected by default. Scheduled uses all five approved `NYC_PLAN.day()` routes and their actual map coordinates, including any individually scheduled custom stop. **All** restores the unscheduled/Wishlist alternatives. The control changes marker visibility only; it does **not** remove saved places, modify the approved timetable or change calendar exports. The selected display mode is saved locally under `noux_map_filter_v1`. The control only appears while the native map is visible.
+- **Explore** remains the only global floating shortcut, but its mobile position has been lifted above the iPhone Safari toolbar. It rechecks its mount after the decrypted React app renders and can remount if missing. Previously a retained `basic=1` recovery session skipped Explore entirely. That case now gets **display-only Explore**, which never re-wraps or alters the approved route. Other existing Explore functionality remains available.
+- Regressions: `scripts/test_map_filter.js`, `scripts/test_explorer_mobile.js`; existing approved-plan, unlock and sync regressions remain in GitHub Pages workflow. The public filter never decrypts the vault, stores secrets or modifies React-managed markup.
+- **Limitations:** this filters pins on the **existing All-stops Map**; it is not an additional map. It uses published venue coordinates and existing MapLibre markers, not independently verified GPS stop locations. Physical Safari/iPhone deployment validation still needs a short smoke test.
+
 ## Final route, booking and enrichment audit (22 November 2026)
 
 - **Native schedule and map:** every approved stop in the five days uses `NYC_PLAN.day()`; map markers, itinerary timings, downstream search, current scheduled routing estimates and calendar exports read the same final plan. Friday's Brooklyn Bridge crossing remains compulsory in the approved sightseeing route. Thursday's Sadie's lunch is 13:20–14:15 after Mercer Labs, and Tuesday Blue Note doors/dining are planned for 18:30–19:30 ahead of the 20:00 show.
