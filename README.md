@@ -10,6 +10,14 @@ If the visual React interface genuinely cannot mount, NOUX opens a **read-only e
 
 Use **no browser-data-clearing instructions** for recovery: browser storage contains pairing information and potentially unsynchronised edits. On release, scripts and the offline cache are versioned `20261122-login1`. The `scripts/test_unlock_recovery.js` CI suite checks immediate/slow/short first paint, unrelated errors, emergency fallback and the formerly looping basic mode. This is a synthetic regression gate, not a substitute for testing Safari/Chrome on real devices.
 
+## Apply the final privately approved five-day route (22 November 2026)
+
+The detailed 23–27 November route is **not committed as plaintext**. Public `trip-revision.js` accepts the approved private JSON **only after normal NOUX unlock**. The existing in-memory AES-256-GCM key encrypts the approved route in browser storage, with a separate authenticated encryption context. Original private vault, passphrase, packing and saved choices are not overwritten. An atomic ciphertext value is included in the existing end-to-end shared sync and becomes visible on another paired device after reopening NOUX.
+
+To apply the final route, download the private approved-plan JSON from the conversation. Unlock NOUX and open **Trip Settings → Shared / offline → Approved itinerary → Import approved plan**, select the file, and choose **View updated itinerary**. Never upload private JSON to GitHub or public issues. The approved route replaces archived schedules in the original day planner and its map, transit, calendar and search views. Independently added custom stops and separately confirmed commitments are retained. Obsolete sunrise/roof/nightlife choice cards no longer drive the itinerary. The remaining native decision is Friday's conditional **DUMBO/Brooklyn Bridge vs West Village** option. Tickets not explicitly confirmed remain marked unbooked.
+
+After encrypted sync, the other paired browser can reload and unlock to see the same plan. When unpaired, import locally on the second device or pair first. The code push cannot decrypt or replace the original private vault remotely without the owner's passphrase; import is the safe way to activate this revision without exposing travel details.
+
 ## Privacy and security model
 
 The published itinerary is encrypted locally using AES-256-GCM. Its PBKDF2 passphrase is **never included in the repository or GitHub Actions secrets**, and is never transmitted to a backend. The public HTML/CSS entry screen, venue images and dependency bundles can be downloaded without authentication; the AES-encrypted itinerary cannot be decrypted without the private passphrase. This is **client-side content encryption, not server-side HTTP access control**. Real private access restrictions require a separate authenticated host (such as Cloudflare Access or a private app server).
