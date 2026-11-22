@@ -6,7 +6,7 @@
 if(window.NOUX_BOOKING_DESK)return;
 const KEY='noux_booking_status_v1';
 const ITEMS=[
- ['mon','04','Cruise · Golden Hour','booked','Cruise confirmed; check the exact pier and boarding deadline.',''],
+ ['mon','04','Cruise · Golden Hour','booked','Pier 79, NY Waterway West Midtown Terminal (459 12th Ave), Slip 2. Arrive around 15:25; meeting/boarding at 15:40; sailing 16:00–18:00.','https://www.nywaterway.com/midtownw39thterminal.aspx'],
  ['mon','07','Dear Irving on Hudson · 21:15','booked','Table for two already reserved.','https://www.dearirving.com/'],
  ['tue','01','Butterfly Vivarium · 10:30','ticket','Timed entry required.','https://www.amnh.org/plan-your-visit'],
  ['tue','03','Guggenheim · 13:30','ticket','Museum admission; planned after AMNH.','https://www.guggenheim.org/plan-your-visit'],
