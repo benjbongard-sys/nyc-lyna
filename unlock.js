@@ -12,20 +12,106 @@
   try{return new URLSearchParams(location.search).get('basic')==='1'||sessionStorage.getItem('noux_basic_mode')==='1'}catch(_){return false}
  })();
  window.NYC_BASE=new URL('./',location.href).href;
- function recovery(message){
-  if(document.getElementById('noux-recovery'))return;
-  const wrap=document.createElement('section');wrap.id='noux-recovery';
-  wrap.setAttribute('role','alert');wrap.style.cssText='position:fixed;inset:0;z-index:6000;display:grid;place-items:center;background:#101722;padding:20px;color:#f6ecdf;font-family:system-ui,sans-serif';
-  const card=document.createElement('div');card.style.cssText='max-width:520px;width:100%;padding:34px;background:#202938;border:1px solid #987d5d;border-radius:18px;box-shadow:0 25px 65px #0008';
-  const title=document.createElement('h2');title.textContent='Your New York is still here';title.style.cssText='font:400 32px Georgia,serif;margin:0 0 14px';
-  const copy=document.createElement('p');copy.textContent=message||'The encrypted itinerary opened, but the visual planner could not start. Your saved choices have not been cleared.';copy.style.cssText='line-height:1.7;color:#c5c8d0';
-  const action=document.createElement('button');action.textContent='Reopen the basic itinerary';action.style.cssText='margin-top:17px;padding:14px 18px;background:#e2c398;border:0;border-radius:9px;color:#17202b;font-weight:750;cursor:pointer;min-height:48px';
-  action.onclick=()=>{try{sessionStorage.setItem('noux_basic_mode','1')}catch(_){}const u=new URL(location.href);u.searchParams.set('basic','1');location.assign(u.href)};
-  const note=document.createElement('p');note.textContent='You will enter your private passphrase again. No trip data, packing checks or preferences are erased.';note.style.cssText='margin-top:18px;font-size:12px;color:#abb9c3';
-  card.append(title,copy,action,note);wrap.append(card);document.body.append(wrap);
- }
+ // The previous 700 ms / 40-character test falsely rejected valid logins,
+ // and its basic-mode action repeated the same test. A valid passphrase now
+ // yields either the full app or a usable *read-only* decrypted itinerary.
  function healthy(){
-  const root=$('root');return !!(root&&!root.hidden&&root.childElementCount>0&&root.textContent.trim().length>40);
+  const root=$('root');
+  if(!root||root.hidden||root.childElementCount===0)return false;
+  if(root.querySelector?.('.app-shell,.topbar,.mainnav,.daytabs,.hero'))return true;
+  return (root.textContent||'').trim().length>10;
+ }
+ function setLoading(on){
+  let loading=$('noux-boot-loading');
+  if(!on){loading?.remove?.();return}
+  if(loading)return;
+  loading=document.createElement('section');loading.id='noux-boot-loading';
+  loading.setAttribute('role','status');loading.setAttribute('aria-live','polite');
+  loading.style.cssText='position:fixed;inset:0;z-index:5000;display:grid;place-items:center;background:#101722;color:#f7e2c7;font:500 17px system-ui,sans-serif;padding:24px;text-align:center';
+  loading.textContent='Opening your New York itinerary…';
+  document.body.appendChild(loading);
+ }
+ async function waitForApp(){
+  // React can mount asynchronously on slower devices or when browser memory
+  // is constrained. Ignore unrelated resource/network errors if the app mounts.
+  const until=Date.now()+8000;
+  while(Date.now()<until){
+   if(healthy())return true;
+   await new Promise(resolve=>setTimeout(resolve,250));
+  }
+  return healthy();
+ }
+ function emergency(message,details){
+  if($('noux-emergency-itinerary'))return;
+  setLoading(false);
+  const root=document.createElement('section');root.id='noux-emergency-itinerary';
+  root.setAttribute('role','main');root.style.cssText='position:fixed;inset:0;z-index:6000;overflow-y:auto;background:#101722;color:#f5e9dc;font:14px/1.65 system-ui,sans-serif;padding:clamp(16px,5vw,50px)';
+  const wrap=document.createElement('div');wrap.style.cssText='max-width:850px;margin:auto';
+  const heading=document.createElement('h1');heading.textContent='Your New York itinerary';
+  heading.style.cssText='font:400 clamp(32px,6vw,52px)/1.15 Georgia,serif;color:#efd1a2;margin:10px 0 16px';
+  const desc=document.createElement('p');desc.textContent=message||'The visual interface could not load, but your encrypted itinerary opened successfully.';
+  const info=document.createElement('p');info.textContent='This is a safe, read-only version. Your bookings, saved choices, personal stops and encrypted checklist are not being deleted or replaced.';
+  info.style.cssText='color:#c4cbcd';
+  const controls=document.createElement('div');controls.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 25px';
+  function action(label,fn){const b=document.createElement('button');b.type='button';b.textContent=label;b.style.cssText='min-height:44px;border:1px solid #d7b88d;border-radius:9px;padding:11px 15px;background:#e4c597;color:#15202c;font-weight:750';b.addEventListener('click',fn);return b}
+  controls.appendChild(action('Check full view again',()=>{
+   if(healthy()){root.remove();return}
+   const hint=document.createElement('p');hint.textContent='The full view has not loaded yet. The itinerary below remains available.';
+   hint.style.cssText='color:#e2bc87';controls.after(hint);
+  }));
+  controls.appendChild(action('Reload website',()=>location.reload()));
+  const note=document.createElement('p');note.textContent='Troubleshooting: '+details;
+  note.style.cssText='font-size:11px;color:#b2b9c0;word-break:break-word';
+  wrap.append(heading,desc,info,controls);
+  const data=window.NYC_DATA,plan=window.NYC_PLAN;
+  const choices=Object.assign({},data?.DEFAULT||{});
+  try{
+   const keys=Object.keys(localStorage).filter(k=>/^nyc_lyna_trip_v\d+$/.test(k))
+    .sort((a,b)=>Number(b.split('_v').pop())-Number(a.split('_v').pop()));
+   const saved=keys.length?JSON.parse(localStorage.getItem(keys[0])||'{}'):{};
+   if(saved?.choices&&typeof saved.choices==='object')Object.assign(choices,saved.choices);
+  }catch(_){}
+  const days=[['mon','Monday'],['tue','Tuesday'],['wed','Wednesday'],['thu','Thursday'],['fri','Friday']];
+  let stopCount=0;
+  for(const [day,label] of days){
+   const section=document.createElement('section');section.style.cssText='padding:16px 0;border-top:1px solid #45505c';
+   const name=document.createElement('h2');name.textContent=label;name.style.cssText='font:400 26px Georgia,serif;color:#ecd0a5';
+   section.appendChild(name);
+   let events=[];
+   try{events=plan?.day?.(day,choices)||[]}catch(_){}
+   if(!Array.isArray(events))events=[];
+   events.slice(0,60).forEach(evt=>{
+    const item=document.createElement('article');item.style.cssText='border-left:2px solid #bc9970;margin:14px 0;padding:3px 0 7px 14px';
+    const title=document.createElement('strong');title.textContent=[evt.start||'',evt.title||'Planned stop'].filter(Boolean).join(' · ');
+    title.style.cssText='color:#f6e9db';item.appendChild(title);
+    const place=data?.P?.[evt.place];
+    if(place?.address){
+     const p=document.createElement('p');p.textContent=place.address;
+     p.style.cssText='color:#d0bec0;font-size:12px;margin:5px 0';item.appendChild(p);
+     const link=document.createElement('a');link.textContent='Directions';link.href='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(place.address);
+     link.target='_blank';link.rel='noopener noreferrer';link.style.cssText='color:#e6c18b;font-size:12px';item.appendChild(link);
+    }
+    if(evt.status){
+     const status=document.createElement('p');status.textContent='Status: '+evt.status;
+     status.style.cssText='font-size:11px;color:#acb6c0;margin:4px 0';item.appendChild(status);
+    }
+    section.appendChild(item);stopCount++;
+   });
+   if(!events.length){const p=document.createElement('p');p.textContent='No schedule available for this day in the emergency view.';section.appendChild(p)}
+   wrap.appendChild(section);
+  }
+  if(stopCount===0){
+   const p=document.createElement('p');p.textContent='The schedule engine also could not initialise. Please use your previously exported itinerary or check the GitHub Pages status; your browser data has not been cleared.';
+   p.style.cssText='color:#f3c79d';wrap.appendChild(p);
+  }
+  wrap.appendChild(note);root.appendChild(wrap);document.body.appendChild(root);
+  // If React finishes mounting unusually late, dismiss the emergency view
+  // without asking for another passphrase.
+  const app=$('root');
+  if(app&&typeof MutationObserver!=='undefined'){
+   const observer=new MutationObserver(()=>{if(healthy()){observer.disconnect();root.remove()}});
+   observer.observe(app,{childList:true,subtree:true});
+  }
  }
  const stars=$('lock-stars');
  for(let i=0;i<50;i++){const star=document.createElement('i');star.style.setProperty('--x',`${(i*71+13)%98}%`);star.style.setProperty('--y',`${(i*41+19)%84}%`);star.style.setProperty('--delay',`${(i%15)*-.23}s`);star.style.setProperty('--size',`${i%9===0?3:1}px`);stars.appendChild(star)}
@@ -82,7 +168,8 @@
     };
     planner.__centennialParade=true;
    }
-   // Errors in the visual app must never leave an unexplained blue screen.
+   // A successful render is authoritative. Unrelated network/image errors
+   // must never turn a successfully decrypted itinerary into a login failure.
    let visualError=false;
    const onVisualError=()=>{visualError=true};
    window.addEventListener('error',onVisualError);
@@ -102,10 +189,12 @@
     }
    }
    $('root').hidden=false;screen.style.display='none';
-   // First confirm that the unmodified React app has actually painted.
-   await new Promise(resolve=>setTimeout(resolve,700));
-   if(!healthy()||visualError){
-    recovery('The encrypted itinerary unlocked, but the visual planner did not finish opening. Try the basic itinerary; your personal data remains intact.');
+   setLoading(true);
+   // A slow phone or browser may need several seconds for React's first paint.
+   const rendered=await waitForApp();
+   setLoading(false);
+   if(!rendered){
+    emergency('Your private itinerary decrypted, but the visual interface could not start. The schedule below is still available.', 'Visual app did not mount; React '+(window.React?'loaded':'unavailable')+'; ReactDOM '+(window.ReactDOM?'loaded':'unavailable')+'; root children '+($('root')?.childElementCount||0)+'; script warning '+(visualError?'detected':'not detected'));
    }else{
     if(!basicMode){
      // Progressive enhancement *after* the first React paint. A bad extension
@@ -129,8 +218,10 @@
     // Lyna's optional guided choices are accessible through Explore.
     if(window.NOUX_DECISION_GUIDE){try{window.NOUX_DECISION_GUIDE.install()}catch(_){}}
     if(window.NOUX_TRIP_TOOLS){try{window.NOUX_TRIP_TOOLS.install()}catch(_){}}
-    // Catch a delayed render failure and offer an intact basic fallback.
-    setTimeout(()=>{if(!healthy())recovery('The interactive page stopped rendering. Reopen the basic itinerary; your saved plans and checklist remain intact.')},1200);
+    // If the full view genuinely crashes later, preserve a usable read-only
+    // schedule without a repeating basic-mode login screen.
+    setTimeout(()=>{if(!healthy())emergency('The visual page stopped rendering, but your private schedule is still available.','Delayed render failure; no browser data was erased.')},1600);
+    try{if(basicMode){sessionStorage.removeItem('noux_basic_mode');const url=new URL(location.href);url.searchParams.delete('basic');history.replaceState(null,'',url.href)}}catch(_){} 
    }
    window.removeEventListener('error',onVisualError);
    window.removeEventListener('unhandledrejection',onVisualError);
