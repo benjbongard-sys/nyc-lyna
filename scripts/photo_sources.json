@@ -358,21 +358,23 @@
     "exact": true
   },
   "jfk": {
-    "label": "John F. Kennedy International Airport · Terminal One exterior",
+    "label": "JFK Airport · Terminal 1 departures hall",
     "urls": [
-      "https://mail.jfkterminalone.com/sites/all/themes/jfkone/images/jfk-terminal-one-sky.jpg"
+      "https://commons.wikimedia.org/wiki/Special:FilePath/JFK_Terminal_1_inside.jpg?width=1280",
+      "https://commons.wikimedia.org/wiki/Special:FilePath/JFK_Terminal_One_inside.jpg?width=1280"
     ],
-    "credit": "JFK Terminal One · official terminal photograph",
-    "source": "https://www.jfkterminalone.com/",
+    "credit": "Quintin Soloviev · Wikimedia Commons, CC BY (see licence at source)",
+    "source": "https://commons.wikimedia.org/wiki/File:JFK_Terminal_1_inside.jpg",
     "exact": true
   },
   "tacos": {
-    "label": "Los Tacos No. 1 · NYC counter scene",
+    "label": "Los Tacos No. 1 · NYC restaurant counter",
     "urls": [
-      "https://roadfood.com/wp-content/uploads/2018/11/Los-Tacos-Crowd-1400x933_c.jpg"
+      "https://rimage.gnst.jp/www.gnavi.co.jp/dressing/image/article/51/21251/column_8052b16a1b8dd5903367871b7966d69b.jpg",
+      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/5e/38/ea/caption.jpg?h=1400&s=1&w=1400"
     ],
-    "credit": "Roadfood · Los Tacos No. 1 photograph (branch not guaranteed)",
-    "source": "https://roadfood.com/restaurants/los-tacos-no-1/",
+    "credit": "Gnavi / Tripadvisor · Los Tacos No. 1 restaurant photograph; branch image may differ",
+    "source": "https://www.gnavi.co.jp/dressing/amp/article/21251/",
     "exact": false
   },
   "dear": {
