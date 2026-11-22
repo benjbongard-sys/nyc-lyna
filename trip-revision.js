@@ -216,6 +216,43 @@ function install(){
    if(!DATA.WISHES.some(x=>Array.isArray(x)&&key(x[0]).includes(short)))DATA.WISHES.push(w);
   }
  }
+ // Reflect chosen stops in the existing native wishlist. Keep any other
+ // traveller-created wishes; the optional ARTE MUSEUM remains unassigned.
+ if(Array.isArray(DATA.WISHES)){
+  const curated=[
+   [['butterfly vivarium'],'Butterfly Vivarium','art','tue'],
+   [['guggenheim'],'Guggenheim Museum','art','tue'],
+   [['villa albertine','albertine books'],'Villa Albertine & Albertine Books','culture','tue'],
+   [['hudson vu'],'Hudson VU Rooftop','view','tue'],
+   [['reuben james','blue note'],'Reuben James · Blue Note','music','tue'],
+   [['nypl','new york public library'],'NYPL Schwarzman Building','culture','wed'],
+   [['bryant park'],'Bryant Park Winter Village','culture','wed'],
+   [['chelsea market'],'Chelsea Market','food','wed'],
+   [['lobster place'],'Lobster Place · lobster roll','food','wed'],
+   [['whitney'],'Whitney Museum','art','wed'],
+   [['little island'],'Little Island','culture','wed'],
+   [['domino park'],'Domino Park','view','wed'],
+   [['awoke vintage'],'Awoke Vintage','shopping','wed'],
+   [['stella dallas','10 ft single'],'Stella Dallas vintage','shopping','wed'],
+   [['louie vega'],'Louie Vega · Flashback','music','wed'],
+   [['grand central'],'Grand Central Terminal','culture','thu'],
+   [['mercer labs'],'Mercer Labs','art','thu'],
+   [['sadie s','sadies'],'Sadie’s Seaport','food','thu'],
+   [['daydream','balloon museum'],'DAYDREAM · Balloon Museum','art','thu'],
+   [['nubeluz'],'Nubeluz','view','thu'],
+   [['dumbo'],'DUMBO Waterfront','view','fri'],
+   [['brooklyn bridge'],'Brooklyn Bridge · daytime crossing','view','fri'],
+   [['golden diner'],'Golden Diner','food','fri'],
+   [['rough trade'],'Rough Trade Below','shopping','fri']
+  ];
+  const norm=t=>String(t||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  for(const [aliases,title,category,day] of curated){
+   const found=DATA.WISHES.find(row=>Array.isArray(row)&&
+    !/\bsunrise\b/i.test(String(row[0]))&&aliases.some(a=>norm(row[0]).includes(norm(a))));
+   if(found){found[2]=day;found[3]='core'}
+   else DATA.WISHES.push([title,category,day,'core']);
+  }
+ }
  // All five days were approved. Archive obsolete itinerary decision cards.
  // The final-day route is immutable in the approved private manifest.
  if(Array.isArray(DATA.CHOICES))DATA.CHOICES.splice(0,DATA.CHOICES.length);
