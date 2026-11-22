@@ -9,6 +9,14 @@ if(window.NOUX_PLAN_REVISION)return;
 const STORE='noux_trip_revision_v1',PREFIX='NOUXPLAN1',AAD='NOUX-APPROVED-TRIP-V1',FORMAT='noux-approved-plan-v1';
 const DATES={mon:'2026-11-23',tue:'2026-11-24',wed:'2026-11-25',thu:'2026-11-26',fri:'2026-11-27'};
 const enc=new TextEncoder();
+// A named, locally bundled photo for each approved stop. Logistical entries
+// reuse the image of their actual destination rather than a random skyline.
+const APPROVED_PHOTO_KEYS={"hotel":"hotel","jfk":"jfk","pier":"pier79","times":"times","tacos":"tacos","dear":"dear","amnh":"butterfly","gugg":"guggenheim","albertine":"albertine","hudsonvu":"hudsonvu","blue":"bluenote","nypl":"nypl","bryant":"bryant","chelsea":"lobsterplace","whitney":"whitney","little":"little","domino":"domino","awoke":"awoke","stella":"stella","mables":"mables","superior":"superior","grand":"grandcentral","mercer":"mercer","sadies":"sadies","daydream":"daydream","colbo":"colbo","wildones":"wildones","nubeluz":"nubeluz","dumbo":"dumbo","bridge_bk":"bridge","bridge_mh":"bridge","golden":"golden","rough":"rough"};
+function approvedPhoto(id){
+ const key=APPROVED_PHOTO_KEYS[id];
+ const meta=key&&window.NYC_PHOTO_INDEX?.[key];
+ return meta&&typeof meta.path==='string'&&/^assets\/photos\/[a-z0-9_-]+\.jpg$/.test(meta.path)?meta.path:'';
+}
 const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
 let KEY=null,DOC=null,ERROR='',WRAPPED=null,INITIALISED=false;
 const toB64=a=>{let str='';for(let i=0;i<a.length;i+=8192)str+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(str)};
@@ -110,8 +118,6 @@ function priorPlace(target){
  return null;
 }
 function directions(from,to,mode){
- if(to==='noux_pier')return 'https://www.google.com/maps/search/?api=1&query='+
-   encodeURIComponent('Cruise boarding pier on ticket voucher New York');
  const p=window.NYC_DATA?.P||{};
  if(!p[to])return '';
  let origin=from;
@@ -135,6 +141,9 @@ function finalEvents(day,choices,previous){
  const rows=source.map(x=>{
   const e={id:x.id,start:x.start,end:x.end,title:x.title,kind:x.kind,status:x.status,
    detail:String(x.detail||''),place:'noux_'+x.place};
+  // Expose the same destination photo to renderers that use event-level data.
+  const eventPhoto=approvedPhoto(x.place)||window.NYC_DATA?.P?.[e.place]?.photo;
+  if(typeof eventPhoto==='string'&&eventPhoto)e.photo=eventPhoto;
   if(x.url)e.url=x.url;
   if(['ticket-to-check','hours-to-check','proposed'].includes(x.status)&&window.NOUX_BOOKING_DESK?.confirmed?.(e.id)){
    if(x.status==='hours-to-check'){e.status='proposed';e.detail=(e.detail+' Opening hours checked manually.').trim();}
@@ -179,9 +188,9 @@ function install(){
   const original=id==='hotel'?(DATA.P.sanctuary||DATA.P.hotel):
    id==='jfk'?(DATA.P.jfk||DATA.P.airport):null;
   const legacy=(photoAliases[id]||[]).map(k=>DATA.P[k]).find(v=>v?.photo)||null;
+  const image=approvedPhoto(id)||original?.photo||legacy?.photo||p.photo||undefined;
   DATA.P[key]={...p,...(original||{}),kind:p.kind||'place',
-   url:p.url||original?.url||'',area:p.area||'NYC',
-   photo:original?.photo||legacy?.photo||p.photo||undefined};
+   url:p.url||original?.url||'',area:p.area||'NYC',photo:image};
  }
  if(Array.isArray(DATA.DAYS)){
   const headings={
@@ -299,5 +308,7 @@ function status(){
  return {ready:!!KEY,active:!!DOC,installed:INITIALISED,revision:DOC?.revision||'',error:ERROR,
   synced:!!window.NOUX_SYNC?.getStatus?.()?.paired};
 }
-window.NOUX_PLAN_REVISION={prepare,install,decorate,importText,importFile,status,active:()=>!!DOC,version:'2026.11.22-direct2'};
+window.NOUX_PLAN_REVISION={prepare,install,decorate,importText,importFile,status,active:()=>!!DOC,
+ photoStatus:()=>Object.entries(APPROVED_PHOTO_KEYS).map(([place,key])=>({place,key,ready:!!approvedPhoto(place)})),
+ version:'2026.11.23-pier79-photos1'};
 })();
