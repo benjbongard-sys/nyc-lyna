@@ -2,6 +2,10 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('explorer.js','utf8'),css=fs.readFileSync('styles.css','utf8');
+class TripClock extends Date{
+ constructor(...args){super(...(args.length?args:['2026-11-26T05:30:00Z']))}
+ static now(){return Date.parse('2026-11-26T05:30:00Z')}
+}
 new vm.Script(source,{filename:'explorer.js'});
 assert(css.includes('#noux-explorer-launch.noux-explorer-launch'),'Dedicated mobile Explore visibility CSS is included');
 assert(css.includes('bottom:calc(83px + env(safe-area-inset-bottom,0px))'),'Button clears Safari toolbar and home indicator');
@@ -26,17 +30,18 @@ const names=['mon','tue','wed','thu','fri'];
 const data={P:loc,DEFAULT:{},CHOICES:[],DATES:Object.fromEntries(names.map((d,i)=>[d,'2026-11-'+(23+i)])),
  DAYS:names.map((d,i)=>[d,d.toUpperCase(),String(23+i)+' NOV']),WISHES:[]};
 const find=id=>[...body.children].find(n=>n.id===id)||null;
+const docListeners={};
 const document={
  body,readyState:'complete',
  getElementById:id=>id==='root'?root:find(id),
  createElement:t=>new Node(t),
  querySelectorAll:()=>[],
  querySelector:()=>null,
- addEventListener(){}
+ addEventListener(k,fn){(docListeners[k]??=[]).push(fn)}
 };
 const context={window:{NYC_DATA:data,NYC_PLAN:{day:base},NOUX_PLAN_REVISION:{active:()=>true},
  NOUX_CHOICES:{alternatives:()=>{throw Error('Retired Decisions is not initialised')}}},
- document,localStorage:storage,Array,Object,JSON,Date,Math,Intl,Set,Number,String,
+ document,localStorage:storage,Array,Object,JSON,Date:TripClock,Math,Intl,Set,Number,String,
  setTimeout:fn=>{fn();return 1},setInterval:()=>1};
 vm.runInNewContext(source,context,{filename:'explorer.js'});
 const explorer=context.window.NOUX_EXPLORER;
@@ -50,6 +55,11 @@ assert(!launch.hidden,'Explore visible on iPhone');
 launch.click();
 assert.equal(drawer.hidden,false,'Explore opens drawer on iPhone');
 assert(drawer.children.length>4,'Drawer contains actual itinerary/wishlist sections');
+const next=drawer.children.find(n=>n.className==='noux-explorer-now');
+assert(next?.children.some(n=>/Louie Vega/.test(n.textContent)),'At NYC Thursday 00:30, Wednesday club remains active');
+drawer.scrollTop=168;
+for(const fn of docListeners['noux:replan']||[])fn();
+assert.equal(drawer.scrollTop,168,'Explore refresh preserves mobile scroll position');
 assert(!drawer.children.some(x=>x.textContent==='The five-day itinerary is still available. Open the schedule or Wishlist below.'),
  'Retired Decisions must not cause fallback or a blank drawer');
 launch.click();
