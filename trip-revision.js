@@ -109,14 +109,25 @@ function finalEvents(day,choices,previous){
 function install(){
  const DATA=window.NYC_DATA,PLAN=window.NYC_PLAN;
  if(!DOC||!DATA?.P||!PLAN||typeof PLAN.day!=='function')return false;
+ const photoAliases={
+  hotel:['sanctuary','hotel'],jfk:['jfk','airport'],pier:['pier'],
+  times:['times'],amnh:['amnh'],gugg:['guggenheim','gugg'],
+  albertine:['albertine'],hudsonvu:['hudsonvu'],blue:['bluenote','blueNote'],
+  nypl:['nypl'],bryant:['bryant'],chelsea:['chelsea'],whitney:['whitney'],
+  little:['littleIsland','little'],domino:['domino'],awoke:['awoke'],
+  stella:['stella'],mables:['mables'],superior:['superiorIngredients'],
+  grand:['grandcentral','grand'],mercer:['mercer'],golden:['golden'],
+  rough:['roughtrade','rough'],dumbo:['dumbo']
+ };
  for(const [id,p] of Object.entries(DOC.places)){
   const key='noux_'+id;
-  // Never publish the hotel address or a private flight booking in the plan
-  // template. Reuse the exact protected original places after decrypting.
+  // Exact lodging details remain exclusively in the decrypted private vault.
   const original=id==='hotel'?(DATA.P.sanctuary||DATA.P.hotel):
    id==='jfk'?(DATA.P.jfk||DATA.P.airport):null;
+  const legacy=(photoAliases[id]||[]).map(k=>DATA.P[k]).find(v=>v?.photo)||null;
   DATA.P[key]={...p,...(original||{}),kind:p.kind||'place',
-   url:p.url||original?.url||'',area:p.area||'NYC'};
+   url:p.url||original?.url||'',area:p.area||'NYC',
+   photo:original?.photo||legacy?.photo||p.photo||undefined};
  }
  if(Array.isArray(DATA.DAYS)){
   const headings={
