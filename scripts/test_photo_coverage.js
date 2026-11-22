@@ -24,12 +24,12 @@ for(const place of referenced){
   missing.push(place+' (unresolved photo mapping)');continue;
  }
  const path=index[entry.key].path;
- if(!/^assets\\/photos\\/[a-z0-9_-]+\\.jpg$/.test(path)||!fs.existsSync(path)||fs.statSync(path).size<6000){
+ if(!path.startsWith('assets/photos/')||!path.endsWith('.jpg')||!fs.existsSync(path)||fs.statSync(path).size<6000){
   missing.push(place+' (missing or invalid local image: '+path+')');continue;
  }
  assert(typeof index[entry.key].credit==='string'&&index[entry.key].credit.length>5,
   'Missing image credit for '+place);
- assert(typeof index[entry.key].source==='string'&&/^https:\\/\\//.test(index[entry.key].source),
+ assert(typeof index[entry.key].source==='string'&&index[entry.key].source.startsWith('https://'),
   'Missing photo source for '+place);
 }
 assert.equal(missing.length,0,'Scheduled images missing: '+missing.join('; '));
