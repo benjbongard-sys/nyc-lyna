@@ -177,13 +177,13 @@
     "exact": false
   },
   "times": {
-    "label": "Times Square",
+    "label": "Times Square · Manhattan evening lights",
     "urls": [
-      "https://images.unsplash.com/photo-1543716091-a840c05249ec?w=1200&q=82"
+      "https://images.unsplash.com/photo-1503179008861-d1e2b41f8bec?auto=format&fit=crop&q=80&w=1600"
     ],
-    "credit": "Unsplash contributor / NYC street photography",
-    "source": "https://unsplash.com/s/photos/times-square",
-    "exact": false
+    "credit": "Unsplash photographer · actual Times Square street photograph",
+    "source": "https://unsplash.com/fr/photos/new-york-times-square-0_la3_Slfwk",
+    "exact": true
   },
   "williamsburg": {
     "label": "Williamsburg waterfront",
@@ -213,13 +213,14 @@
     "exact": false
   },
   "dumbo": {
-    "label": "DUMBO Brooklyn bridge",
+    "label": "DUMBO Washington Street · Manhattan Bridge view",
     "urls": [
-      "https://images.unsplash.com/photo-1522083165195-3424ed129620?w=1200&q=82"
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Manhattan_Bridge_from_Washington_Street,_Dumbo,_Brooklyn,_New_York.jpg?width=1280",
+      "https://dumbomanhattanbridgeview.org/_next/image?q=75&url=%2Fimages%2Fdumbo-manhattan-bridge-view%2Fwashington-street-hero.jpg&w=1080"
     ],
-    "credit": "Unsplash contributor / NYC atmosphere",
-    "source": "https://unsplash.com/s/photos/dumbo",
-    "exact": false
+    "credit": "Christian David · Wikimedia Commons (licence and attribution at source)",
+    "source": "https://commons.wikimedia.org/wiki/File:Manhattan_Bridge_from_Washington_Street,_Dumbo,_Brooklyn,_New_York.jpg",
+    "exact": true
   },
   "morales": {
     "label": "David Morales performing (historical event, not Refuge 2026)",
@@ -346,5 +347,180 @@
     "credit": "Unsplash contributor / illustrative panorama",
     "source": "https://unsplash.com/s/photos/nyc-rooftop",
     "exact": false
+  },
+  "pier79": {
+    "label": "Pier 79 · NY Waterway W 39th Street terminal",
+    "urls": [
+      "https://nywaterway.com/UserFiles/Images/2024/TerminalPhotos/Midtown_terminal_photo.jpg"
+    ],
+    "credit": "NY Waterway · official Midtown terminal photograph",
+    "source": "https://www.nywaterway.com/midtownw39thterminal.aspx",
+    "exact": true
+  },
+  "jfk": {
+    "label": "John F. Kennedy International Airport · Terminal One exterior",
+    "urls": [
+      "https://mail.jfkterminalone.com/sites/all/themes/jfkone/images/jfk-terminal-one-sky.jpg"
+    ],
+    "credit": "JFK Terminal One · official terminal photograph",
+    "source": "https://www.jfkterminalone.com/",
+    "exact": true
+  },
+  "tacos": {
+    "label": "Los Tacos No. 1 · NYC counter scene",
+    "urls": [
+      "https://roadfood.com/wp-content/uploads/2018/11/Los-Tacos-Crowd-1400x933_c.jpg"
+    ],
+    "credit": "Roadfood · Los Tacos No. 1 photograph (branch not guaranteed)",
+    "source": "https://roadfood.com/restaurants/los-tacos-no-1/",
+    "exact": false
+  },
+  "dear": {
+    "label": "Dear Irving on Hudson · actual cocktail lounge",
+    "urls": [
+      "https://images.squarespace-cdn.com/content/v1/6657473029b32b4d481e589a/1716995889174-MOD7AAG6OZWIYGMD19MV/dear-irving-hudson.jpg"
+    ],
+    "credit": "Dear Irving · official venue photograph",
+    "source": "https://www.dearirving.com/dear-irving-on-hudson",
+    "exact": true
+  },
+  "hudsonvu": {
+    "label": "Hudson VU · skyline rooftop",
+    "urls": [
+      "https://images.squarespace-cdn.com/content/v1/67c4aa6d567eb71b70bf5597/69ceb028-1663-474f-a821-731b020f6449/HudsonVU_1160.jpg"
+    ],
+    "credit": "Hudson VU Rooftop · official private-events gallery",
+    "source": "https://www.hudsonvunyc.com/private-events",
+    "exact": true
+  },
+  "bryant": {
+    "label": "Bryant Park Winter Village · skating pavilion",
+    "urls": [
+      "https://bryantpark.org/images/cache/assets/uploads/images/general/Overlook-Open-House_2025-10-28_Joseph-Buscarello_120_web-1200x800.jpg"
+    ],
+    "credit": "Joseph Buscarello · Bryant Park Winter Village official site",
+    "source": "https://bryantpark.org/activities/overlook-lounge",
+    "exact": true
+  },
+  "lobsterplace": {
+    "label": "Chelsea Market · The Lobster Place oyster bar",
+    "urls": [
+      "https://images.squarespace-cdn.com/content/v1/5c6c8783523958b58c320e1b/1575312854204-YRUWYNDPGF2CU3M1TW8S/2NpKCDMw.jpg",
+      "https://res.cloudinary.com/the-infatuation/image/upload/v1721753320/images/Chelsea_Market_3_sda6fo.jpg"
+    ],
+    "credit": "The Lobster Place · Chelsea Market official directory",
+    "source": "https://www.chelseamarket.com/directory-all/the-lobster-place",
+    "exact": true
+  },
+  "whitney": {
+    "label": "Whitney Museum · official entrance",
+    "urls": [
+      "https://whitneymedia.org/assets/image/832033/large_WMAA73197_14-Whitney-2016_Jobst.jpg"
+    ],
+    "credit": "Whitney Museum of American Art · official photograph",
+    "source": "https://whitney.org/events/member-orientation-2026",
+    "exact": true
+  },
+  "little": {
+    "label": "Little Island · architectural waterfront view",
+    "urls": [
+      "https://images.divisare.com/images/c_limit%2Cf_auto%2Ch_2000%2Cq_auto%2Cw_3000/v1621946761/jb5obp1h50vzujsikd9j/heatherwick-studio-timothy-schenck-little-island.jpg",
+      "https://assets2.cbsnewsstatic.com/hub/i/r/2021/07/23/aeec3458-7306-4486-99f4-4c6f7db083fd/thumbnail/1200x630/202dd4d702827d1667c97a3575eed6e6/little-island-aerial.jpg?v=631cf5f2b4e8db7f9bc428589402864d"
+    ],
+    "credit": "Timothy Schenck / Heatherwick Studio via Divisare",
+    "source": "https://divisare.com/projects/442825-heatherwick-studio-timothy-schenck-little-island",
+    "exact": true
+  },
+  "awoke": {
+    "label": "Awoke Vintage · Williamsburg shop interior",
+    "urls": [
+      "https://www.behindthescenesnyc.com/wp-content/uploads/2017/04/Ladies-awoke-vintage-clothes-racks.jpg"
+    ],
+    "credit": "Behind the Scenes NYC · Awoke Vintage photographed shop",
+    "source": "https://www.behindthescenesnyc.com/top-3-vintage-stores-in-brooklyn/",
+    "exact": true
+  },
+  "stella": {
+    "label": "10 ft Single by Stella Dallas · Williamsburg storefront",
+    "urls": [
+      "https://images.squarespace-cdn.com/content/v1/61afae0b1e4c7d4386ce798e/b989200f-b25c-4f65-b579-dd1576ec90ab/image.jpeg"
+    ],
+    "credit": "Vanity Stories · photographed Stella Dallas store",
+    "source": "https://www.vanitystories.com/theedit/a-review-of-bella-hadids-favorite-vintage-shop",
+    "exact": true
+  },
+  "mables": {
+    "label": "Mable's Smokehouse · Williamsburg restaurant exterior",
+    "urls": [
+      "https://static.spotapps.co/website_images/ab_websites/11790_website/video_poster.jpg",
+      "https://static.spotapps.co/spots/9e/842d3f9dfd4033b24cd384408860d2/full"
+    ],
+    "credit": "Mable's Smokehouse · official restaurant website",
+    "source": "https://mablessmokehouse.com/",
+    "exact": true
+  },
+  "sadies": {
+    "label": "Sadie's Seaport · official restaurant dining room",
+    "urls": [
+      "https://images.getbento.com/accounts/b5f0b5a3b9c3d23d43b1033ec03042b3/media/images/57786IMG_1419.jpg?auto=compress%2Cformat&crop=focalpoint&cs=origin&fit=crop&fp-x=0.5&fp-y=0.5&w=1200"
+    ],
+    "credit": "Sadie's NYC · official restaurant photograph",
+    "source": "https://www.sadies.nyc/",
+    "exact": true
+  },
+  "daydream": {
+    "label": "Balloon Museum · DAYDREAM art installation",
+    "urls": [
+      "https://img.bucketlisters.com/experience_media/6116/1781022064915.webp",
+      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/34/88/af/1a/caption.jpg?h=1600&s=1&w=1600"
+    ],
+    "credit": "Bucket Listers · DAYDREAM experience photograph",
+    "source": "https://bucketlisters.com/experience/balloon-museum-new-york-city",
+    "exact": true
+  },
+  "colbo": {
+    "label": "Colbo Next Door · Lower East Side listening bar / boutique",
+    "urls": [
+      "https://casaindonesia.com/lkgallery/teaser/colbo-next-door_of-enso_dezeen_hero1-1233x693-1_83_20260313072009qnsejk.jpg"
+    ],
+    "credit": "Casa Indonesia · Colbo Next Door interior",
+    "source": "https://casaindonesia.com/article/read/4/2026/9657/listening-bar-hadir-di-dalam-butik-colbo-new-york",
+    "exact": true
+  },
+  "wildones": {
+    "label": "Only The Wild Ones · analogue listening room illustration",
+    "urls": [
+      "https://images.squarespace-cdn.com/content/v1/61705697f087bf34dd72257f/8eb2e070-cce6-4b04-ac04-f29718eb263a/WildOnes_opening_Michael%2BKen%2BStewart_madnames-09641.jpg?format=2500w"
+    ],
+    "credit": "Only The Wild Ones · official gallery, sister-location photo (not necessarily New York)",
+    "source": "https://www.onlythewildones.com/new-york",
+    "exact": false
+  },
+  "golden": {
+    "label": "Golden Diner · named restaurant's signature food",
+    "urls": [
+      "https://images.squarespace-cdn.com/content/v1/55aacab5e4b0e8a77a1a3a3a/1580151522006-ASXPMD7OYWVTAOVQ185D/photo%2Bjan%2B24%2C%2B10%2B17%2B49%2Bam.jpeg"
+    ],
+    "credit": "This Is The Place I Was Telling You About · Golden Diner food photograph",
+    "source": "https://www.thisistheplaceiwastellingyouabout.com/everyday/golden-diner",
+    "exact": true
+  },
+  "rough": {
+    "label": "Rough Trade Below · Rockefeller Center record shop",
+    "urls": [
+      "https://cdn.shopify.com/s/files/1/0589/1434/1054/files/img-8120-1744309438-67f80cbe0964f.jpg?v=1744309443&width=1280"
+    ],
+    "credit": "Rough Trade Below / Toneoptic · storefront photograph",
+    "source": "https://www.toneoptic.com/pages/rough-trade-below",
+    "exact": true
+  },
+  "bridge": {
+    "label": "Brooklyn Bridge · pedestrian promenade",
+    "urls": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/BrooklynBridgeWalkwayCrowd.jpg?width=1280"
+    ],
+    "credit": "BrooklynBridgeWalkwayCrowd photographer · Wikimedia Commons (reuse terms at source)",
+    "source": "https://commons.wikimedia.org/wiki/File:BrooklynBridgeWalkwayCrowd.jpg",
+    "exact": true
   }
 }
