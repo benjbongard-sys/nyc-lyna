@@ -36,7 +36,9 @@ const context={window:{NYC_DATA:data,NYC_PLAN:{day:base},NOUX_PLAN_REVISION:{act
  setTimeout:fn=>{fn();return 1},setInterval:()=>1};
 vm.runInNewContext(source,context,{filename:'explorer.js'});
 const explorer=context.window.NOUX_EXPLORER;
-assert(explorer.install(),'Explorer installed after private data');
+const approvedDay=context.window.NYC_PLAN.day;
+assert(explorer.install({displayOnly:true}),'Explorer installed after private data even in basic/approved mode');
+assert.equal(context.window.NYC_PLAN.day,approvedDay,'Explorer must not modify fixed approved schedule in recovery/basic mode');
 assert(explorer.ensure(),'Explore shortcut is mounted and visible after React first paint');
 let launch=find('noux-explorer-launch'),drawer=find('noux-explorer-drawer');
 assert(launch&&drawer,'Explore and its drawer are present');
