@@ -183,6 +183,9 @@
     const el=document.createElement('script');el.textContent=scripts[name]+`\n//# sourceURL=noux-private-${name}`;document.head.appendChild(el);
     if(name==='data.js'){try{window.NOUX_FOOD_WISHLIST?.install()}catch(_){/* optional food additions must never break unlock */}}
      if(name==='itinerary.js')attachCentennialParade();
+    if(name==='custom-stops.js'&&basicMode&&window.NOUX_PLAN_REVISION?.active()){
+     try{window.NOUX_PLAN_REVISION.install()}catch(_){}
+    }
     if(name==='custom-stops.js'&&!basicMode){
      // The stable venue/explorer layers can initialise here; choices, route
      // auditing and subway enhancements must not mutate state before React's
