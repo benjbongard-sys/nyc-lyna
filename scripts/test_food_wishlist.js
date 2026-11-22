@@ -17,25 +17,25 @@ const original=[
 const data={WISHES:original.map(x=>x.slice()),P:{museum:{name:"Test"}},DEFAULT:{choice:"keep"}};
 const food=load(data),first=food.install();
 assert.equal(first.ready,true);
-assert.equal(first.total,13);
+assert.equal(first.total,15);
 assert.equal(first.existing,3);
-assert.equal(first.added,10);
-assert.equal(data.WISHES.length,14);
+assert.equal(first.added,12);
+assert.equal(data.WISHES.length,16);
 assert.equal(JSON.stringify(data.WISHES.slice(0,4)),JSON.stringify(original),"Existing wishes unchanged");
 assert.equal(JSON.stringify(data.P),JSON.stringify({museum:{name:"Test"}}),"Places unchanged");
 assert.equal(data.DEFAULT.choice,"keep","Trip choices unchanged");
-assert.equal(data.WISHES.filter(x=>x[1]==="food").length,13);
-assert.equal(data.WISHES.filter(x=>x[1]==="food"&&x[3]==="core").length,2,
+assert.equal(data.WISHES.filter(x=>x[1]==="food").length,15);
+assert.equal(data.WISHES.filter(x=>x[1]==="food"&&x[3]==="core").length,4,
  "Previously existing Joe's priority preserved; other Must Try priorities set correctly");
-assert.equal(data.WISHES.filter(x=>x[1]==="food"&&x[2]==="").length,10,
+assert.equal(data.WISHES.filter(x=>x[1]==="food"&&x[2]==="").length,12,
  "New wishes must not force a particular day");
 const second=food.install();
 assert.equal(second.added,0,"Repeated unlock must not duplicate");
-assert.equal(data.WISHES.length,14);
+assert.equal(data.WISHES.length,16);
 const clean={WISHES:[]};
-assert.equal(load(clean).install().added,13);
-assert.equal(clean.WISHES.filter(x=>x[3]==="core").length,4);
+assert.equal(load(clean).install().added,15);
+assert.equal(clean.WISHES.filter(x=>x[3]==="core").length,6);
 assert(clean.WISHES.every(x=>Array.isArray(x)&&x.length===4&&x[1]==="food"&&x[2]===""),
  "All new suggestions use native Food category and flexible time");
 assert.equal(load({}).install().ready,false,"Unknown private schema must be left untouched");
-console.log("Food wishlist PASS: 13 curated stops, existing items preserved, deduplication, flexible days.");
+console.log("Food wishlist PASS: 15 curated stops, existing items preserved, deduplication, flexible days.");
