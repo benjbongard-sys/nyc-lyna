@@ -94,7 +94,9 @@ function apply(board,pts){
   // If old markers were created before the public hook, use the existing
   // React-designated optional-marker class. Unknown pins stay visible rather
   // than accidentally hiding a scheduled/custom place.
-  const onPlan=position?match(position,pts):!option;
+  // An optional pin remains optional even when co-located with a
+  // scheduled venue (same building, rooftop, food court or gallery).
+  const onPlan=!option&&(position?match(position,pts):true);
   if(onPlan)scheduled++;
   if(mode==='scheduled'&&!onPlan)hide(node);else restore(node);
  });
