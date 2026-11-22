@@ -3,7 +3,7 @@
  * No decryption, passwords, localStorage, live subway feeds or remote API caching.
  */
 'use strict';
-const VERSION='20261122-map1';
+const VERSION='20261122-explore2';
 const SHELL='noux-shell-'+VERSION;
 const VAULT='noux-encrypted-vault-'+VERSION;
 const ASSETS=[
