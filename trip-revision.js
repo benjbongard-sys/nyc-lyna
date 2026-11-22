@@ -1,7 +1,7 @@
-/* NOUX privately approved itinerary revision.
- * Public application logic only. The approved schedule is imported after the
- * original password unlock, encrypted with the existing in-memory vault key,
- * and stored only as ciphertext. It may then be shared by NOUX encrypted sync.
+/* NOUX automatically approved five-day itinerary.
+ * Places and sightseeing times live in public approved-week.js. Booking
+ * identifiers, the original private vault and passphrase are never published.
+ * Unlocked users see the current itinerary without importing any file.
  */
 (function(){
 'use strict';
@@ -49,15 +49,22 @@ async function prepare({key}={}){
  if(!key||!crypto?.subtle)return false;
  KEY=key;ERROR='';DOC=null;
  try{
+  // The latest final itinerary is now deployed automatically for both devices.
+  // No JSON import, old choices, or obsolete synced migration can replace it.
+  if(window.NOUX_APPROVED_WEEK){
+   DOC=validate(window.NOUX_APPROVED_WEEK);
+   return true;
+  }
+  // Compatibility only for a site that has not loaded the direct plan yet.
   const record=localStorage.getItem(STORE);
-  if(!record)return true;
+  if(!record)return false;
   const match=/^NOUXPLAN1\.([A-Za-z0-9+/=]+)\.([A-Za-z0-9+/=]+)$/.exec(record);
-  if(!match)throw Error('The saved itinerary has an unsupported encrypted format.');
+  if(!match)throw Error('Encrypted previous revision is invalid');
   const buf=await crypto.subtle.decrypt(
    {name:'AES-GCM',iv:fromB64(match[1]),additionalData:enc.encode(AAD)},KEY,fromB64(match[2]));
   DOC=validate(JSON.parse(dec.decode(buf)));
   return true;
- }catch(e){ERROR='Private itinerary cannot be opened on this device. Original plans remain available. '+(e?.message||'');return false}
+ }catch(e){ERROR='Unable to activate final itinerary; previous plan remains available. '+(e?.message||'');return false}
 }
 async function importText(text){
  if(!KEY)throw Error('Unlock NOUX with your regular passphrase first.');
@@ -90,21 +97,12 @@ function finalEvents(day,choices,previous){
   if(x.source_status==='conditional')e.detail=(e.detail+' Weather or holiday dependent.').trim();
   return e;
  });
- // Preserve independently added personal stops and separately confirmed
- // commitments, but not the archived itinerary, automatically suggested detours,
- // or duplicate flight/cruise/hotel events.
- const primary=rows.filter(x=>x.status==='booked'||x.status==='arranged');
+ // The user expressly replaced the five earlier itineraries. Only
+ // independently added personal stops survive, never legacy dining/nightlife.
  for(const item of Array.isArray(previous)?previous:[]){
-  if(!item||typeof item.id!=='string')continue;
-  const custom=/^(custom|user)[_-]/i.test(item.id);
-  const protectedOther=['booked','confirmed'].includes(String(item.status||''))&&!custom;
-  if(!custom&&!protectedOther)continue;
+  if(!item||typeof item.id!=='string'||!/^(custom|user)[_-]/i.test(item.id))continue;
   if(rows.some(x=>x.id===item.id))continue;
-  if(protectedOther&&primary.some(x=>Math.abs(minutes(x.start)-minutes(item.start))<=35))continue;
-  if(protectedOther&&/sunrise|macy.{0,20}parade/i.test(item.title||''))continue;
-  const personal={...item};
-  if(protectedOther)personal.detail=(personal.detail||'')+' Retained from earlier confirmed itinerary; verify against approved plan.';
-  rows.push(personal);
+  rows.push({...item});
  }
  return rows.sort((a,b)=>minutes(a.start)-minutes(b.start));
 }
@@ -112,10 +110,25 @@ function install(){
  const DATA=window.NYC_DATA,PLAN=window.NYC_PLAN;
  if(!DOC||!DATA?.P||!PLAN||typeof PLAN.day!=='function')return false;
  for(const [id,p] of Object.entries(DOC.places)){
-  // Curated destination locations are private until the itinerary is unlocked.
   const key='noux_'+id;
-  DATA.P[key]={...p,kind:p.kind||'place',url:p.url||'',area:p.area||'NYC'};
+  // Never publish the hotel address or a private flight booking in the plan
+  // template. Reuse the exact protected original places after decrypting.
+  const original=id==='hotel'?(DATA.P.sanctuary||DATA.P.hotel):
+   id==='jfk'?(DATA.P.jfk||DATA.P.airport):null;
+  DATA.P[key]={...p,...(original||{}),kind:p.kind||'place',
+   url:p.url||original?.url||'',area:p.area||'NYC'};
  }
+ if(Array.isArray(DATA.DAYS)){
+  const headings={
+   mon:'Harbour cruise, Times Square and cocktails',
+   tue:'Butterflies, art, Villa Albertine and live soul',
+   wed:'Chelsea, Williamsburg vintage and Louie Vega',
+   thu:'Grand Central, immersive art and listening lounge',
+   fri:'DUMBO, Brooklyn Bridge, Golden Diner and departure'
+  };
+  for(const row of DATA.DAYS)if(Array.isArray(row)&&headings[row[0]])row[3]=headings[row[0]];
+ }
+ try{document.body?.classList.add('noux-final-approved')}catch(_){};
  // All five days were approved. Archive obsolete itinerary decision cards.
  // The final-day route is immutable in the approved private manifest.
  if(Array.isArray(DATA.CHOICES))DATA.CHOICES.splice(0,DATA.CHOICES.length);
@@ -130,12 +143,15 @@ function install(){
   return finalEvents(day,choices||{},base);
  };
  next.__nouxApprovedRevision=true;
- WRAPPED=next;PLAN.day=next;INITIALISED=true;
+ WRAPPED=next;PLAN.day=next;
+ // Legacy choice-conflict warnings refer to retired Thursday decisions.
+ PLAN.findConflicts=()=>[];
+ INITIALISED=true;
  return true;
 }
 function status(){
  return {ready:!!KEY,active:!!DOC,installed:INITIALISED,revision:DOC?.revision||'',error:ERROR,
   synced:!!window.NOUX_SYNC?.getStatus?.()?.paired};
 }
-window.NOUX_PLAN_REVISION={prepare,install,importText,importFile,status,active:()=>!!DOC,version:'2026.11.22-private1'};
+window.NOUX_PLAN_REVISION={prepare,install,importText,importFile,status,active:()=>!!DOC,version:'2026.11.22-direct2'};
 })();
