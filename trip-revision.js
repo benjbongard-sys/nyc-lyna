@@ -147,7 +147,12 @@ function finalEvents(day,choices,previous){
   if(x.url)e.url=x.url;
   if(['ticket-to-check','hours-to-check','proposed'].includes(x.status)&&window.NOUX_BOOKING_DESK?.confirmed?.(e.id)){
    if(x.status==='hours-to-check'){e.status='proposed';e.detail=(e.detail+' Opening hours checked manually.').trim();}
-   else {
+   else if(/^WAITLISTED:/i.test(x.detail||'')){
+    // Only a NEW explicit admission flag can promote this waitlist. Existing
+    // legacy ticket checkboxes are ignored by the booking-desk migration guard.
+    e.status='booked';
+    e.detail='Louie Vega admission ticket marked as issued after waitlist in Tickets & reservations. The Room is indoors, not the rooftop. 00:45 is the planned personal departure, not the event finish at 04:00.';
+   }else {
     e.status='booked';
     e.detail=String(x.detail||'')
      .replace(/tickets? (?:are |is )?not (?:yet )?(?:assumed )?(?:purchased|booked|confirmed)\.?/ig,'')
@@ -155,7 +160,7 @@ function finalEvents(day,choices,previous){
      .replace(/\s{2,}/g,' ').trim();
     e.detail=(e.detail+' Manually confirmed in Tickets & reservations.').trim();
    }
-  }else if(x.status==='ticket-to-check'&&!/not booked|not purchased|to book/i.test(e.detail))
+  }else if(x.status==='ticket-to-check'&&!/not booked|not purchased|to book|waitlisted|not confirmed/i.test(e.detail))
    e.detail=(e.detail+' Ticket or reservation not yet confirmed.').trim();
   if(x.source_status==='conditional')e.detail=(e.detail+' Weather or holiday dependent.').trim();
   return e;
@@ -318,5 +323,5 @@ function status(){
 }
 window.NOUX_PLAN_REVISION={prepare,install,decorate,importText,importFile,status,active:()=>!!DOC,
  photoStatus:()=>Object.entries(APPROVED_PHOTO_KEYS).map(([place,key])=>({place,key,ready:!!approvedPhoto(place)})),
- version:'2026.11.23-pier79-photos1'};
+ version:'2026.11.23-bookings2'};
 })();
