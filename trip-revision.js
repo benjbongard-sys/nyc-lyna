@@ -42,7 +42,7 @@ function validate(source){
   if(!obj||!Array.isArray(obj.events))throw Error('A travel day is missing.');
   validateEvents(obj.events);
  }
- if(source.alternatives.friday_if_bridge_done_or_rain)validateEvents(source.alternatives.friday_if_bridge_done_or_rain);
+ // Alternatives are not allowed to override an explicitly approved day.
  return source;
 }
 async function prepare({key}={}){
@@ -79,8 +79,8 @@ async function importFile(file){
 function minutes(s){return Number(s?.slice(0,2))*60+Number(s?.slice(3,5))}
 function finalEvents(day,choices,previous){
  const date=DATES[day];if(!date||!DOC?.days?.[date])return previous;
- const alternate=day==='fri'&&choices?.c12==='village'&&DOC.alternatives?.friday_if_bridge_done_or_rain;
- const source=alternate||DOC.days[date].events;
+ // Friday 27 is fixed: DUMBO → Brooklyn Bridge → Golden Diner.
+ const source=DOC.days[date].events;
  const rows=source.map(x=>{
   const e={id:x.id,start:x.start,end:x.end,title:x.title,kind:x.kind,status:x.status,
    detail:String(x.detail||''),place:'noux_'+x.place};
@@ -116,18 +116,9 @@ function install(){
   const key='noux_'+id;
   DATA.P[key]={...p,kind:p.kind||'place',url:p.url||'',area:p.area||'NYC'};
  }
- // Remove obsolete decisions (old dining/roof choices and sunrise). Retain the
- // same native Decisions tab with one useful Friday weather-dependent route.
- const existing=Array.isArray(DATA.CHOICES)?DATA.CHOICES:null;
- if(existing){
-  const decision={id:'c12',day:'fri',title:'Friday · Brooklyn Bridge or West Village?',
-   desc:'Approved itinerary: use West Village only if the bridge was already completed or the weather prevents the crossing.',
-   options:[['bridge','DUMBO + Brooklyn Bridge · default','Visit the waterfront, cross the bridge, Golden Diner, Rough Trade and hotel pickup.'],
-            ['village','West Village instead · weather fallback','Only when Brooklyn Bridge is already completed or conditions are unsafe. Golden Diner and the transfer stay fixed.']]};
-  existing.splice(0,existing.length,decision);
-  DATA.DEFAULT=DATA.DEFAULT||{};
-  if(!['bridge','village'].includes(DATA.DEFAULT.c12))DATA.DEFAULT.c12='bridge';
- }
+ // All five days were approved. Archive obsolete itinerary decision cards.
+ // There is no Friday alternative: DUMBO and Brooklyn Bridge stay scheduled.
+ if(Array.isArray(DATA.CHOICES))DATA.CHOICES.splice(0,DATA.CHOICES.length);
  // Re-wrap if a later optional enhancement changed the plan function; the
  // curated itinerary always wins over all archived route-planning defaults.
  if(PLAN.day===WRAPPED)return true;
@@ -135,12 +126,8 @@ function install(){
  const next=function(day,choices){
   let base=[];try{base=prev(day,choices)}catch(_){/* old planner must not block the approved plan */}
   if(!DOC)return base;
-  const selection={...DATA.DEFAULT,...(choices||{})};
-  const saved=(()=>{try{return JSON.parse(localStorage.getItem('nyc_lyna_trip_v6')||'{}')?.choices||{}}catch(_){return {}}})();
-  if(!own(selection,'c12')&&own(saved,'c12'))selection.c12=saved.c12;
-  // Prefer live user choices, then saved choices, then the safe default.
-  if(!choices||!own(choices,'c12'))selection.c12=saved.c12||DATA.DEFAULT.c12;
-  return finalEvents(day,selection,base);
+  // The approved Friday route cannot be changed by stale local choices.
+  return finalEvents(day,choices||{},base);
  };
  next.__nouxApprovedRevision=true;
  WRAPPED=next;PLAN.day=next;INITIALISED=true;
