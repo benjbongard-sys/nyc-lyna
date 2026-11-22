@@ -25,7 +25,7 @@ class Node{
 const body=new Node('body'),root=new Node('div');root.id='root';
 const storage={getItem:()=>null,setItem(){}};
 const loc={hotel:{name:'Hotel',area:'Midtown',kind:'hotel',lat:40.755,lng:-73.985}};
-const base=()=>[{id:'stay',start:'10:00',end:'11:00',title:'Stay at hotel',place:'hotel',kind:'hotel',status:'arranged'}];
+const base=day=>day==='wed'?[{id:'club',start:'22:00',end:'00:45',title:'Louie Vega · The Room',place:'hotel',kind:'club',status:'ticket-to-check'}]:[{id:'stay',start:'10:00',end:'11:00',title:'Stay at hotel',place:'hotel',kind:'hotel',status:'arranged'}];
 const names=['mon','tue','wed','thu','fri'];
 const data={P:loc,DEFAULT:{},CHOICES:[],DATES:Object.fromEntries(names.map((d,i)=>[d,'2026-11-'+(23+i)])),
  DAYS:names.map((d,i)=>[d,d.toUpperCase(),String(23+i)+' NOV']),WISHES:[]};
