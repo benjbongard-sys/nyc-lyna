@@ -5,7 +5,7 @@
 (function(){
 'use strict';
 if(window.NOUX_TRIP_TOOLS)return;
-let INSTALLED=false,OPEN=false,ROOT=null,TRIGGER=null,OFFLINE=null,BUSY=false,ERROR='',REG=null,OBS=null,REFRESH_ID=0;
+let INSTALLED=false,OPEN=false,ROOT=null,TRIGGER=null,OFFLINE=null,BUSY=false,ERROR='',IMPORT_STATUS='',REG=null,OBS=null,REFRESH_ID=0;
 const el=(tag,cls,content)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(content!==undefined)n.textContent=String(content);return n};
 const button=(title,action,cls)=>{const b=el('button',cls||'',title);b.type='button';b.addEventListener('click',action);return b};
 function nativeSettings(){
@@ -100,6 +100,30 @@ function render(){
   if(typeof window.NOUX_SYNC?.open==='function')window.NOUX_SYNC.open();
   else alert('Shared sync is not available in this browser session. Reopen NOUX online.');
  },'noux-trip-tools-primary'));
+ const approved=el('section','noux-trip-tool-row');
+ const plan=window.NOUX_PLAN_REVISION?.status?.()||{};
+ approved.append(el('h3',null,'Approved itinerary'),el('p',null,'Replace the old five-day routes with the validated private plan. Import after unlocking; the file is encrypted on this phone with your existing passphrase and shared as ciphertext when devices are paired. No trip details are published on GitHub.'));
+ approved.append(el('small','noux-trip-tool-state',plan.active?
+  (plan.installed?'Approved itinerary active · '+(plan.revision||'latest'):'Approved itinerary encrypted · reload to activate'):
+  (plan.error||'The original encrypted itinerary is unchanged until you import your approved file.')));
+ const input=el('input','noux-trip-plan-file');
+ input.type='file';input.accept='.json,application/json';input.hidden=true;
+ input.setAttribute('aria-label','Choose approved private itinerary JSON');
+ input.addEventListener('change',async()=>{
+  const file=input.files?.[0];if(!file)return;
+  BUSY=true;IMPORT_STATUS='';render();
+  try{
+   const result=await window.NOUX_PLAN_REVISION.importFile(file);
+   IMPORT_STATUS='Saved securely · '+result.days+' days. Reopen the itinerary to apply the replacement routes.';
+  }catch(e){IMPORT_STATUS='Import failed: '+(e?.message||'Unknown file error')+'. No old data was erased.'}
+  finally{BUSY=false;if(OPEN)render()}
+ });
+ const importAction=button(BUSY?'Importing…':'Import approved plan',()=>input.click(),'noux-trip-tools-primary');
+ importAction.disabled=BUSY||typeof window.NOUX_PLAN_REVISION?.importFile!=='function';
+ approved.append(importAction,input);
+ if(IMPORT_STATUS)approved.append(el('small','noux-trip-tool-state',IMPORT_STATUS));
+ if(plan.active&&!plan.installed)approved.append(button('View updated itinerary',()=>location.reload(),'noux-trip-tools-primary'));
+ if(plan.active&&plan.installed)approved.append(el('p',null,'Friday route: choose Brooklyn Bridge or West Village in the native Decisions tab. Your booking and packing controls remain available.'));
  const cache=el('section','noux-trip-tool-row');
  cache.append(el('h3',null,'Offline essentials'),el('p',null,'Save public app files and the encrypted trip vault on each phone. Map tiles and real-time MTA arrivals still need internet.'));
  const ready=OFFLINE?.ready||OFFLINE?.ok&&OFFLINE.vaultSaved&&OFFLINE.failed?.length===0;
@@ -117,7 +141,7 @@ function render(){
   close();window.NOUX_DEPARTURE?.open?.();
  },'noux-trip-tools-secondary'));
  const footer=el('p','noux-trip-tools-fine','This panel appears only inside the Trip Settings flow. No passwords, local choices or bookings are changed by opening it.');
- inner.replaceChildren(header,sync,cache,packing,footer);
+ inner.replaceChildren(header,sync,approved,cache,packing,footer);
 }
 function install(){
  if(INSTALLED)return true;
