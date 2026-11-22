@@ -5,6 +5,8 @@ const {TextEncoder,TextDecoder}=require('node:util');
 const source=fs.readFileSync('unlock.js','utf8');
 new vm.Script(source,{filename:'unlock.js'});
 assert(!source.includes('Reopen the basic itinerary'),'No repeating basic-mode recovery button');
+assert(!/attachCentennialParade|centennial_parade/.test(source),'Retired parade never injected during unlock');
+assert(source.includes('planReady!==true'),'Missing final plan must not load historical days');
 assert(source.includes('noux-emergency-itinerary'),'Read-only emergency itinerary available');
 class Element{
  constructor(tag,id=''){
@@ -65,7 +67,8 @@ async function boot(mode='immediate',basic=false){
   fire(k){(events[k]||[]).forEach(f=>f({type:k}))},
   NOUX_EXPLORER:{install(){}},NOUX_VENUES:{install(){}},NOUX_CHOICES:{install(){}},
   NOUX_DAY_AUDIT:{install(){}},NOUX_SUBWAY:{install(){}},
-  NOUX_DEPARTURE:{install:async()=>true}
+  NOUX_DEPARTURE:{install:async()=>true},
+  NOUX_PLAN_REVISION:{prepare:async()=>mode!=='missing-plan',active:()=>mode!=='missing-plan',install:()=>true,decorate:()=>true}
  };
  const document={
   body,head,
@@ -117,6 +120,10 @@ async function run(){
  assert(!emergency.textContent.includes('synthetic-passphrase-only'),'No passphrase appears in diagnostics');
  assert(failed.document.getElementById('noux-boot-loading')===null,'Loading mask removed after emergency view opens');
  assert(!emergency.textContent.includes('Reopen the basic itinerary'),'Old loop action removed');
+ const noPlan=await boot('missing-plan');
+ assert.equal(noPlan.nodes.root.childElementCount,0,'Incomplete current release must not mount historical app');
+ assert.equal(noPlan.nodes['unlock-pass'].disabled,false,'User can retry without clearing saved choices');
+ assert(/approved trip/i.test(noPlan.nodes['unlock-message'].textContent),'Unverified final plan gives an actionable error');
  const basic=await boot('empty',true);
  assert(basic.document.getElementById('noux-emergency-itinerary'),'Previously flagged basic mode also has safe fallback');
  assert(!basic.location.reloaded,'No forced reload loop');
