@@ -308,6 +308,15 @@
   DATA=window.NYC_DATA;PLAN=window.NYC_PLAN;
   if(!DATA||!DATA.P||!PLAN||typeof PLAN.day!=='function')return false;
   Object.keys(extraPlaces).forEach(function(k){if(!DATA.P[k])DATA.P[k]=extraPlaces[k]});
+  // A recovery/basic session must still show Explore, but must NEVER
+  // re-wrap the final approved itinerary or re-add retired optional stops.
+  if(options&&options.displayOnly || window.NOUX_PLAN_REVISION?.active()){
+   READY=true;
+   if(!(options&&options.headless)){
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+   }
+   return true;
+  }
   baseDay=PLAN.day.bind(PLAN);
   PLAN.day=function(day,choices){
    if(choices&&typeof choices==='object')lastChoices=Object.assign({},choices);
