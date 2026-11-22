@@ -3,7 +3,7 @@
  * No decryption, passwords, localStorage, live subway feeds or remote API caching.
  */
 'use strict';
-const VERSION='20261121-slim3';
+const VERSION='20261122-login1';
 const SHELL='noux-shell-'+VERSION;
 const VAULT='noux-encrypted-vault-'+VERSION;
 const ASSETS=[
