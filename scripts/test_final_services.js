@@ -52,11 +52,29 @@ for(const n of names)vm.runInNewContext(code(n),ctx,{filename:n});
  const booking=win.NOUX_BOOKING_DESK;
  assert.equal(booking.confirmed('approved_20261123_07'),true,'Dear Irving previously booked');
  assert.equal(booking.confirmed('approved_20261127_09'),true,'Airport group coach arranged');
- assert.equal(booking.confirmed('approved_20261125_13'),false,'Louie Vega not automatically purchased');
+ for(const [eventId,label] of [
+  ['approved_20261124_01','Davis Family Butterfly Vivarium'],
+  ['approved_20261124_06','Hudson VU'],
+  ['approved_20261126_03','Mercer Labs']
+ ]){
+  assert.equal(booking.confirmed(eventId),true,label+' confirmed directly in default release');
+ }
+ assert.equal(booking.status().waitlisted,1,'Louie Vega is on waitlist, not an issued ticket');
+ assert.equal(booking.confirmed('approved_20261125_13'),false,'Louie Vega waitlist never counts as confirmed entry');
+ // A confirmation boolean saved under the OLD ticket model must not
+ // silently promote a waitlisted reservation after the release.
+ db.setItem('noux_booking_status_v1',JSON.stringify({confirmations:{approved_20261125_13:true}}));
+ assert.equal(booking.confirmed('approved_20261125_13'),false,'Legacy confirmation stays preserved but is not treated as waitlist admission');
+ assert.equal(win.NYC_PLAN.day('wed',{}).find(x=>x.id==='approved_20261125_13').status,'ticket-to-check','Old stored value cannot auto-book Louie Vega');
  assert(booking.setConfirmed('approved_20261125_13',true),'Manual booking can be marked');
  assert.equal(booking.confirmed('approved_20261125_13'),true);
+ const savedWaitlist=JSON.parse(db.getItem('noux_booking_status_v1'));
+ assert.equal(savedWaitlist.waitlistAdmissions.approved_20261125_13,true,'New explicit waitlist admission is recorded separately');
+ assert.equal(savedWaitlist.confirmations.approved_20261125_13,true,'Existing stored confirmation field has not been cleared');
  const after=win.NYC_PLAN.day('wed',{});
- assert.equal(after.find(x=>x.id==='approved_20261125_13').status,'booked','Timeline responds to confirmed ticket');
+ assert.equal(after.find(x=>x.id==='approved_20261125_13').status,'booked','Explicitly issued admission upgrades waitlist to booked');
+ assert(!/WAITLISTED|entry is NOT guaranteed/i.test(after.find(x=>x.id==='approved_20261125_13').detail),'Waitlist warning removed only after verified upgrade');
+ assert.equal(booking.status().waitlisted,0,'Promoted waitlist stops counting as unconfirmed');
  assert.equal(win.NYC_PLAN.day('fri',{}).find(x=>x.id==='approved_20261127_09').status,'arranged','Coach stays arranged, not falsely booked');
  assert(!booking.setConfirmed('approved_20261123_07',false),'Cannot unbook a previously confirmed booking from app');
  assert.equal(booking.confirmed('approved_20261123_07'),true);
