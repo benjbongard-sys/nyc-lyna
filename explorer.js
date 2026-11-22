@@ -194,7 +194,7 @@
   if(!document.body||document.getElementById('noux-explorer-launch'))return;
   var open=false,trigger=press('noux-explorer-launch','✦  Explore',function(){
    if(open){closeDrawer();return}
-   open=true;drawer.hidden=false;trigger.setAttribute('aria-expanded','true');
+   open=true;drawer.hidden=false;drawer.scrollTop=0;trigger.setAttribute('aria-expanded','true');
    try{document.body.classList.add('noux-explorer-open')}catch(_){}
    draw();
   });
@@ -209,6 +209,7 @@
   }
   function draw(){
    if(!open)return;
+   var preservedScroll=drawer.scrollTop||0;
    try{drawContent()}catch(_){
     // Never expose a 40px empty bottom sheet when optional analytics fail.
     var head=element('div','noux-explorer-head');
@@ -222,6 +223,8 @@
     );
     drawer.replaceChildren(head,info,actions);
    }
+   // Rebuilding a time-sensitive panel must not jump the user's mobile scroll.
+   drawer.scrollTop=preservedScroll;
   }
   // The approved five-day itinerary no longer has route decisions. Keep
   // Explore strictly operational: real scheduled days and existing tools.
@@ -235,9 +238,18 @@
    var parts={};ny.forEach(function(x){parts[x.type]=x.value});
    var date=parts.year+'-'+parts.month+'-'+parts.day,t=Number(parts.hour)*60+Number(parts.minute);
    var currentDay=days.find(function(d){return DATA.DATES?.[d]===date});
+   // Wednesday's planned club departure is after midnight on Thursday.
+   var previousDay=currentDay?days[days.indexOf(currentDay)-1]:null;
+   var overnight=previousDay?(plans[previousDay]||[]).find(function(ev){
+    var start=minute(ev.start),end=minute(ev.end);
+    return Number.isFinite(start)&&Number.isFinite(end)&&end<start&&t<end;
+   }):null;
    var live=element('div','noux-explorer-now');
-   live.append(element('small',null,currentDay?'NEXT PLANNED STOP · NEW YORK '+parts.hour+':'+parts.minute:'NEW YORK LOCAL TIME · '+parts.hour+':'+parts.minute));
-   if(currentDay){
+   live.append(element('small',null,overnight?'STILL ON '+labels[previousDay]+' · NEW YORK '+parts.hour+':'+parts.minute:currentDay?'NEXT PLANNED STOP · NEW YORK '+parts.hour+':'+parts.minute:'NEW YORK LOCAL TIME · '+parts.hour+':'+parts.minute));
+   if(overnight){
+    live.append(element('b',null,overnight.start+' · '+overnight.title));
+    live.append(press('noux-explorer-link','View late-night itinerary',function(){closeDrawer();goTo(previousDay)}));
+   }else if(currentDay){
     var upcoming=(plans[currentDay]||[]).find(function(ev){
      var start=minute(ev.start),end=minute(ev.end);
      if(!Number.isFinite(start)||!Number.isFinite(end))return false;
