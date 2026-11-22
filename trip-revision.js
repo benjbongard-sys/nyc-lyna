@@ -232,8 +232,8 @@ function install(){
    [['whitney'],'Whitney Museum','art','wed'],
    [['little island'],'Little Island','culture','wed'],
    [['domino park'],'Domino Park','view','wed'],
-   [['awoke vintage'],'Awoke Vintage','shopping','wed'],
-   [['stella dallas','10 ft single'],'Stella Dallas vintage','shopping','wed'],
+   [['awoke vintage'],'Awoke Vintage','culture','wed'],
+   [['stella dallas','10 ft single'],'Stella Dallas vintage','culture','wed'],
    [['louie vega'],'Louie Vega · Flashback','music','wed'],
    [['grand central'],'Grand Central Terminal','culture','thu'],
    [['mercer labs'],'Mercer Labs','art','thu'],
@@ -243,7 +243,7 @@ function install(){
    [['dumbo'],'DUMBO Waterfront','view','fri'],
    [['brooklyn bridge'],'Brooklyn Bridge · daytime crossing','view','fri'],
    [['golden diner'],'Golden Diner','food','fri'],
-   [['rough trade'],'Rough Trade Below','shopping','fri']
+   [['rough trade'],'Rough Trade Below','culture','fri']
   ];
   const norm=t=>String(t||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   for(const [aliases,title,category,day] of curated){
