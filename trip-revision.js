@@ -140,6 +140,23 @@ function install(){
   for(const row of DATA.DAYS)if(Array.isArray(row)&&headings[row[0]])row[3]=headings[row[0]];
  }
  try{document.body?.classList.add('noux-final-approved')}catch(_){};
+ // Keep relevant creative/music alternatives in the native wishlist, not
+ // as new decisions or extra compulsory day stops.
+ if(Array.isArray(DATA.WISHES)){
+  const extras=[
+   ['ARTE MUSEUM · immersive digital art','art','','choice'],
+   ['Colbo Next Door · listening bar and natural wine','music','','choice'],
+   ['Only The Wild Ones · listening lounge','music','','choice'],
+   ['DAYDREAM · Balloon Museum','art','thu','core'],
+   ['Mercer Labs · art and technology','art','thu','core'],
+   ['West Village · neighbourhood walk','culture','','choice']
+  ];
+  const key=v=>String(v||'').normalize('NFKD').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  for(const w of extras){
+   const short=key(w[0].split(' · ')[0]);
+   if(!DATA.WISHES.some(x=>Array.isArray(x)&&key(x[0]).includes(short)))DATA.WISHES.push(w);
+  }
+ }
  // All five days were approved. Archive obsolete itinerary decision cards.
  // The final-day route is immutable in the approved private manifest.
  if(Array.isArray(DATA.CHOICES))DATA.CHOICES.splice(0,DATA.CHOICES.length);
