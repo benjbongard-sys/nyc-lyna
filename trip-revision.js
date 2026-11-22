@@ -79,7 +79,7 @@ async function importFile(file){
 function minutes(s){return Number(s?.slice(0,2))*60+Number(s?.slice(3,5))}
 function finalEvents(day,choices,previous){
  const date=DATES[day];if(!date||!DOC?.days?.[date])return previous;
- // Friday 27 is fixed: DUMBO → Brooklyn Bridge → Golden Diner.
+ // The approved final-day route is fixed, with no alternative selection.
  const source=DOC.days[date].events;
  const rows=source.map(x=>{
   const e={id:x.id,start:x.start,end:x.end,title:x.title,kind:x.kind,status:x.status,
@@ -117,7 +117,7 @@ function install(){
   DATA.P[key]={...p,kind:p.kind||'place',url:p.url||'',area:p.area||'NYC'};
  }
  // All five days were approved. Archive obsolete itinerary decision cards.
- // There is no Friday alternative: DUMBO and Brooklyn Bridge stay scheduled.
+ // The final-day route is immutable in the approved private manifest.
  if(Array.isArray(DATA.CHOICES))DATA.CHOICES.splice(0,DATA.CHOICES.length);
  // Re-wrap if a later optional enhancement changed the plan function; the
  // curated itinerary always wins over all archived route-planning defaults.
