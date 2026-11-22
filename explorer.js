@@ -192,17 +192,44 @@
  }
  function mount(){
   if(!document.body||document.getElementById('noux-explorer-launch'))return;
-  var open=false,trigger=press('noux-explorer-launch','✦  Explore',function(){open=!open;drawer.hidden=!open;trigger.setAttribute('aria-expanded',String(open));if(open)draw()});
+  var open=false,trigger=press('noux-explorer-launch','✦  Explore',function(){
+   if(open){closeDrawer();return}
+   open=true;drawer.hidden=false;trigger.setAttribute('aria-expanded','true');
+   try{document.body.classList.add('noux-explorer-open')}catch(_){}
+   draw();
+  });
   trigger.id='noux-explorer-launch';trigger.setAttribute('aria-controls','noux-explorer-drawer');trigger.setAttribute('aria-expanded','false');
   var drawer=element('aside','noux-explorer-drawer');drawer.id='noux-explorer-drawer';drawer.hidden=true;drawer.setAttribute('aria-label','NOUX journey explorer');
   document.body.appendChild(trigger);document.body.appendChild(drawer);
+  drawer.setAttribute('role','dialog');drawer.setAttribute('aria-modal','true');
+  function closeDrawer(){
+   open=false;drawer.hidden=true;
+   trigger.setAttribute('aria-expanded','false');
+   try{document.body.classList.remove('noux-explorer-open')}catch(_){}
+  }
   function draw(){
+   if(!open)return;
+   try{drawContent()}catch(_){
+    // Never expose a 40px empty bottom sheet when optional analytics fail.
+    var head=element('div','noux-explorer-head');
+    head.append(element('h2',null,'Explore New York'),
+     press('noux-explorer-close','×',function(){closeDrawer()}));
+    var info=element('p','noux-explorer-intro','The five-day itinerary is still available. Open the schedule or Wishlist below.');
+    var actions=element('div','noux-explorer-actions');
+    actions.append(
+     press('noux-explorer-primary','Open itinerary',function(){closeDrawer();var nav=Array.from(document.querySelectorAll('.topbar .mainnav button')).find(function(x){return /daily itinerary/i.test(x.textContent)});nav?.click()}),
+     press('noux-explorer-secondary','Open Wishlist',function(){closeDrawer();var nav=Array.from(document.querySelectorAll('.topbar .mainnav button')).find(function(x){return /wish list/i.test(x.textContent)});nav?.click()})
+    );
+    drawer.replaceChildren(head,info,actions);
+   }
+  }
+  function drawContent(){
    if(!open)return;
    var choices=currentChoices(),plans=allDays(choices),wish=wishList(),done=wish.filter(function(w){return covered(w,plans)});
    var miss=wish.filter(function(w){return !covered(w,plans)});
    var head=element('div','noux-explorer-head');
    var hbox=element('div');hbox.append(element('small','noux-kicker','NOUX / JOURNEY INTELLIGENCE'),element('h2',null,'Our New York, in motion.'));
-   head.append(hbox,press('noux-explorer-close','×',function(){open=false;drawer.hidden=true;trigger.setAttribute('aria-expanded','false')}));
+   head.append(hbox,press('noux-explorer-close','×',function(){closeDrawer()}));
    var intro=element('p','noux-explorer-intro',window.NOUX_PLAN_REVISION?.active()?'Five approved days. Extra wishlist places are suggestions only; confirmed plans are fixed.':'Five days, continuously adapting to our choices. All added stops are suggestions, never reservations.');
    var modes=element('div','noux-explorer-modes');
    modes.append(press(getMode()==='full'?'is-active':'','Full pace',function(){setMode('full');draw();rerender()}),press(getMode()==='original'?'is-active':'','Original',function(){setMode('original');draw();rerender()}));
@@ -217,7 +244,7 @@
    days.forEach(function(d){
     var rows=plans[d],count=rows.filter(function(e){return !['travel','logistics','recovery'].includes(e.kind)}).length;
     var dateText=(DATA.DAYS||[]).find(function(item){return item[0]===d});
-    var btn=press(selectedDay()===d?'is-selected':'',dateText?dateText[2]:labels[d],function(){open=false;drawer.hidden=true;trigger.setAttribute('aria-expanded','false');goTo(d)});
+    var btn=press(selectedDay()===d?'is-selected':'',dateText?dateText[2]:labels[d],function(){closeDrawer();goTo(d)});
     btn.appendChild(element('small',null,count+' experiences'));
     dayGrid.appendChild(btn);
    });
@@ -245,8 +272,13 @@
    if(!miss.length)radar.appendChild(element('p','noux-help','Every listed wish is represented in the active itinerary.'));
    // Never silently drop an unselected option; keep a visible second-chance ledger.
    var second=element('section','noux-second-chances');
-   var chooser=window.NOUX_CHOICES;
-   if(chooser&&typeof chooser.alternatives==='function'){
+   // All five days are now approved. The legacy Decisions module remains
+   // loaded for backwards compatibility but is intentionally not installed:
+   // calling alternatives() would dereference its null DATA and leave an
+   // empty bottom drawer. Never call retired Decisions from Explore.
+   var finalPlan=!!window.NOUX_PLAN_REVISION?.active?.();
+   var chooser=finalPlan?null:window.NOUX_CHOICES;
+   if(chooser&&Array.isArray(DATA.CHOICES)&&DATA.CHOICES.length&&typeof chooser.alternatives==='function'){
     var alternatives=chooser.alternatives(choices),allChosen=choices.c6==='all';
     second.append(element('h3',null,'Second chances · still on the list'));
     second.append(element('p','noux-help',allChosen?'All three art choices are spread across Tuesday and Wednesday.':'Preferences remain saved on this device; compatible unselected art can be added elsewhere.'));
@@ -263,7 +295,7 @@
       row.append(press('noux-second-review','Review',function(){
        var nav=Array.from(document.querySelectorAll('.topbar .mainnav button')).find(function(x){return /decisions/i.test(x.textContent)});
        if(nav)nav.click();
-       open=false;drawer.hidden=true;trigger.setAttribute('aria-expanded','false');
+       closeDrawer();
        setTimeout(function(){var target=document.getElementById('decision-'+item.group);if(target)target.scrollIntoView({behavior:'smooth',block:'center'})},60);
       }));
      }
@@ -299,7 +331,7 @@
    var observer=new MutationObserver(function(){if(open){clearTimeout(timer);timer=setTimeout(draw,180)}});
    observer.observe(root,{childList:true,subtree:true,characterData:true});
   }
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&open){open=false;drawer.hidden=true;trigger.setAttribute('aria-expanded','false')}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&open){closeDrawer()}});
   document.addEventListener('noux:replan',function(){rerender();if(open)draw()});
   setInterval(function(){if(open)draw()},60000);
  }
