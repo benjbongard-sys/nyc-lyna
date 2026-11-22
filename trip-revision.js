@@ -133,9 +133,12 @@ function directions(from,to,mode){
   origin=priorPlace(to)||'noux_hotel';
  if(!p[origin])origin='noux_hotel';
  if(!p[origin]?.address||!p[to]?.address)return '';
+ // Legacy event cards always pass "transit", even for a 5-minute walk.
+ const km=distance(p[origin],p[to]),best=mode==='walking'||mode==='driving'?mode:
+  (Number.isFinite(km)&&km<=1.05?'walking':'transit');
  return 'https://www.google.com/maps/dir/?'+new URLSearchParams({
   api:'1',origin:p[origin].address,destination:p[to].address,
-  travelmode:mode==='walking'?'walking':mode==='driving'?'driving':'transit'});
+  travelmode:best});
 }
 function finalEvents(day,choices,previous){
  const date=DATES[day];if(!date||!DOC?.days?.[date])return previous;
