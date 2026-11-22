@@ -63,7 +63,12 @@ function dayContent(day){
    make('strong',null,e.start+'–'+e.end+' · '+e.title));
   card.append(top);
   if(place)card.append(make('small','noux-route-address',place.address||place.area||'Location not specified'));
-  const legs=byEvent[e.id]||[];
+  // The published cruise marker is a placeholder, NOT an actual pier.
+   // Never offer its inferred route duration as boarding instructions.
+   if(e.place==='noux_pier'){
+    card.append(make('p','noux-route-pier-warning','BOARDING PIER NOT VERIFIED. Check the exact pier printed on the cruise voucher before leaving the hotel. No travel estimate is shown for this placeholder.'));
+   }
+   const legs=e.place==='noux_pier'?[]:byEvent[e.id]||[];
   for(const l of legs){
    const leg=make('div','noux-route-leg');
    const mode=l.mode==='walking'?'Walk':l.mode==='driving'?'Car / coach':'Subway / transit';
