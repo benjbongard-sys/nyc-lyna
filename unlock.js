@@ -183,6 +183,11 @@
     const el=document.createElement('script');el.textContent=scripts[name]+`\n//# sourceURL=noux-private-${name}`;document.head.appendChild(el);
     if(name==='data.js'){try{window.NOUX_FOOD_WISHLIST?.install()}catch(_){/* optional food additions must never break unlock */}}
      if(name==='itinerary.js')attachCentennialParade();
+    if(name==='custom-stops.js'){
+     // Capture map markers before the private React map creates them. The
+     // filter only changes the visibility of already-rendered map pins.
+     try{window.NOUX_MAP_FILTER?.prepare()}catch(_){}
+    }
     if(name==='custom-stops.js'&&basicMode&&window.NOUX_PLAN_REVISION?.active()){
      try{window.NOUX_PLAN_REVISION.install()}catch(_){}
     }
@@ -228,6 +233,11 @@
     // Native Trip Settings owns these body-only helpers; React stays untouched.
     if(window.NOUX_BOOKING_DESK){try{window.NOUX_BOOKING_DESK.install()}catch(_){}}
     if(window.NOUX_ROUTE_GUIDE){try{window.NOUX_ROUTE_GUIDE.install()}catch(_){}}
+    if(window.NOUX_MAP_FILTER){try{window.NOUX_MAP_FILTER.install()}catch(_){}}
+    // The Explore shortcut is the only permanent on-screen action and must
+    // remain accessible in Safari, even if its first mount was missed.
+    try{window.NOUX_EXPLORER?.ensure?.()}catch(_){}
+    setTimeout(()=>{try{window.NOUX_EXPLORER?.ensure?.()}catch(_){}},850);
 
     // Only contextual helpers remain, outside React and after first paint.
     // Shared sync and offline are accessible through the existing Trip Settings;
