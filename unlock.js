@@ -60,6 +60,7 @@
    hint.style.cssText='color:#e2bc87';controls.after(hint);
   }));
   controls.appendChild(action('Reload website',()=>location.reload()));
+  controls.appendChild(action('Print / save itinerary',()=>{try{window.print?.()}catch(_){}}));
   const note=document.createElement('p');note.textContent='Troubleshooting: '+details;
   note.style.cssText='font-size:11px;color:#b2b9c0;word-break:break-word';
   wrap.append(heading,desc,info,controls);
