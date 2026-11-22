@@ -150,7 +150,14 @@ function finalEvents(day,choices,previous){
   if(x.url)e.url=x.url;
   if(['ticket-to-check','hours-to-check','proposed'].includes(x.status)&&window.NOUX_BOOKING_DESK?.confirmed?.(e.id)){
    if(x.status==='hours-to-check'){e.status='proposed';e.detail=(e.detail+' Opening hours checked manually.').trim();}
-   else {e.status='booked';e.detail=(e.detail+' Manually confirmed in Tickets & bookings.').trim();}
+   else {
+    e.status='booked';
+    e.detail=String(x.detail||'')
+     .replace(/tickets? (?:are |is )?not (?:yet )?(?:assumed )?(?:purchased|booked|confirmed)\.?/ig,'')
+     .replace(/(?:not yet confirmed|not booked|not purchased|not reserved|not assumed purchased)\.?/ig,'')
+     .replace(/\s{2,}/g,' ').trim();
+    e.detail=(e.detail+' Manually confirmed in Tickets & reservations.').trim();
+   }
   }else if(x.status==='ticket-to-check'&&!/not booked|not purchased|to book/i.test(e.detail))
    e.detail=(e.detail+' Ticket or reservation not yet confirmed.').trim();
   if(x.source_status==='conditional')e.detail=(e.detail+' Weather or holiday dependent.').trim();
