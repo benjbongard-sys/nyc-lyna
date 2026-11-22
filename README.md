@@ -2,6 +2,14 @@
 
 A password-unlocked, encrypted personal trip planner hosted on GitHub Pages.
 
+## Cross-device login resilience (22 November 2026)
+
+The site no longer rejects successful decryption merely because **React takes longer than 700 ms**, the first paint contains fewer than 40 characters, or an unrelated JavaScript error occurs. It waits for an actual rendered app and keeps the core planner available even if an optional module cannot initialise.
+
+If the visual React interface genuinely cannot mount, NOUX opens a **read-only emergency itinerary derived from the successfully decrypted trip**, with day-by-day stops, statuses, verified addresses and Google Maps directions, plus a Print / save itinerary action. It does **not** request the passphrase again, offer a looping Basic itinerary button, change saved choices, erase cache storage, reset Cloudflare pairing or overwrite the encrypted checklist. A late React mount can dismiss this emergency view automatically.
+
+Use **no browser-data-clearing instructions** for recovery: browser storage contains pairing information and potentially unsynchronised edits. On release, scripts and the offline cache are versioned `20261122-login1`. The `scripts/test_unlock_recovery.js` CI suite checks immediate/slow/short first paint, unrelated errors, emergency fallback and the formerly looping basic mode. This is a synthetic regression gate, not a substitute for testing Safari/Chrome on real devices.
+
 ## Privacy and security model
 
 The published itinerary is encrypted locally using AES-256-GCM. Its PBKDF2 passphrase is **never included in the repository or GitHub Actions secrets**, and is never transmitted to a backend. The public HTML/CSS entry screen, venue images and dependency bundles can be downloaded without authentication; the AES-encrypted itinerary cannot be decrypted without the private passphrase. This is **client-side content encryption, not server-side HTTP access control**. Real private access restrictions require a separate authenticated host (such as Cloudflare Access or a private app server).
@@ -68,7 +76,7 @@ The public `choice-orchestrator.js` and `day-audit.js` layers run only **after**
 
 - **Friday 27 November:** breakfast at the hotel from 07:00 to 10:00; check out **before 12:00**, leaving suitcases with hotel reception. The booked group transfer is by coach with a French-speaking guide, **approximately 17:00** from the hotel to JFK Terminal 1. The planner puts guests in the lobby by 16:45. This supersedes the earlier speculative noon/15:50 pickup. The private encrypted itinerary retains actual flight booking details.
 - **Brooklyn Bridge sunrise:** a non-ticketed photo-and-walking excursion can be selected for **Wednesday** (default, approximately 06:54 sunrise), **Friday** (approximately 06:56) or skipped. The proposed DUMBO waterfront photo session leads into a Brooklyn → Manhattan pedestrian bridge crossing; travel and dawn weather need rechecking.
-- After successful vault unlock, a final **Departure & gifts** navigation tab appears (mobile: visible fixed launcher). It provides **independent Lyna/Benjamin completion tickboxes**, an editable NYC shopping/bringing-home list, separate **Bought** / **Packed** markers, curated shop websites, Google Maps directions and a one-click current Google Maps shop search for any newly added item. The "Suggest best day" action uses an approximate neighbourhood match to the itinerary, **not live stock availability**.
+- After unlock, **Trip Settings → Shared / offline → Open checklists** opens the existing encrypted **Departure & gifts** checklist. It has separate Lyna/Benjamin ticks, editable souvenirs and Bought/Packed markers, curated shops and live Google Maps search. There is no extra permanent packing launcher.
 - All ticks and shopping notes are saved **encrypted locally with AES-GCM**. After the two phones have been paired, changes also synchronise through encrypted Cloudflare Durable Object storage, preserving Benjamin's and Lyna's independent checkboxes. Encrypted export/import remains available as a separate backup.
 - The shopping suggestions and France customs caveats are informational. Store inventory, special holiday hours, carrier baggage conditions and customs exemptions need verification before purchase.
 
