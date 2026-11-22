@@ -13,6 +13,12 @@ const win={NYC_DATA:{P:{sanctuary:{name:'Protected Accommodation',address:'PRIVA
  NYC_PLAN:{day:d=>[{id:'old_'+d,start:'12:00',end:'14:00',title:'Retired old plan',place:'legacy',status:'proposed',kind:'food'},
   {id:'custom_phone',start:'21:00',end:'21:15',title:'Personal user stop',place:'custom',kind:'shopping',status:'proposed'}],
  findConflicts:()=>['Retired conflict warning']}};
+// Mimic the manifest produced by the photo-builder without publishing any
+// decrypted itinerary or importing external images in this Node test.
+win.NYC_PHOTO_INDEX={
+ pier79:{path:'assets/photos/pier79.jpg',credit:'NY Waterway',source:'https://www.nywaterway.com/',exact:true},
+ lobsterplace:{path:'assets/photos/lobsterplace.jpg',credit:'Chelsea Market',source:'https://www.chelseamarket.com/',exact:true}
+};
 const buttons=[{textContent:"Lyna's decisions",hidden:false,setAttribute(){}},{textContent:'Daily itinerary',hidden:false,setAttribute(){}},{textContent:'Make the decisions',hidden:false,setAttribute(){}}];
 const doc={body:{classList:{classes:new Set(),add(x){this.classes.add(x)}}},getElementById:()=>({querySelectorAll:()=>buttons}),
  dispatchEvent(){}};
@@ -29,6 +35,10 @@ vm.runInNewContext(engine,ctx,{filename:'trip-revision.js'});
  assert.equal(win.NOUX_PLAN_REVISION.install(),true);
  assert.equal(win.NYC_DATA.CHOICES.length,0,'Retired decisions are removed from the native UI');
  assert.equal(win.NYC_DATA.P.noux_hotel.address,'PRIVATE','Protected hotel address reused from decrypted vault');
+ assert.equal(win.NYC_DATA.P.noux_pier.photo,'assets/photos/pier79.jpg','Monday pier renders the actual terminal photograph');
+ assert.equal(win.NYC_DATA.P.noux_chelsea.photo,'assets/photos/lobsterplace.jpg','Chelsea Market uses Lobster Place imagery');
+ assert.equal(win.NYC_PHOTO_INDEX.noux_pier,win.NYC_PHOTO_INDEX.pier79,'Private photo resolver can look up noux_ prefixed places');
+ assert.equal(win.NYC_PLAN.day('mon',{}).find(x=>x.id==='approved_20261123_04').photo,'assets/photos/pier79.jpg','Daily event carries correct destination photo');
  assert(win.NYC_DATA.DAYS[2][3].includes('Louie Vega'),'Day headings reflect approved week');
  assert.equal(win.NYC_PLAN.findConflicts().length,0);
  assert.equal(win.NOUX_PLAN_REVISION.decorate(),true);
