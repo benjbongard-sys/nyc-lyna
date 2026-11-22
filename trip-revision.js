@@ -184,13 +184,21 @@ function install(){
  };
  for(const [id,p] of Object.entries(DOC.places)){
   const key='noux_'+id;
+  // Resolve both supported photo lookup styles: venue.photo and photo index
+  // lookup by the new noux_ place ID. The original private app stays untouched.
+  const imageKey=APPROVED_PHOTO_KEYS[id];
+  const manifest=window.NYC_PHOTO_INDEX;
+  if(manifest&&manifest[imageKey]&&!manifest[key])manifest[key]=manifest[imageKey];
   // Exact lodging details remain exclusively in the decrypted private vault.
   const original=id==='hotel'?(DATA.P.sanctuary||DATA.P.hotel):
    id==='jfk'?(DATA.P.jfk||DATA.P.airport):null;
   const legacy=(photoAliases[id]||[]).map(k=>DATA.P[k]).find(v=>v?.photo)||null;
   const image=approvedPhoto(id)||original?.photo||legacy?.photo||p.photo||undefined;
   DATA.P[key]={...p,...(original||{}),kind:p.kind||'place',
-   url:p.url||original?.url||'',area:p.area||'NYC',photo:image};
+   url:p.url||original?.url||'',area:p.area||'NYC',photo:image,
+   photoCredit:manifest?.[imageKey]?.credit||undefined,
+   photoSource:manifest?.[imageKey]?.source||undefined,
+   photoExact:manifest?.[imageKey]?.exact===true};
  }
  if(Array.isArray(DATA.DAYS)){
   const headings={
