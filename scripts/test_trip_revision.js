@@ -53,7 +53,7 @@ function makeApp(storage){
  const key=await webcrypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);
  const storage=realDb({nyc_lyna_trip_v6:JSON.stringify({choices:{c12:'village'},customStops:[{id:'one',title:'Keep me'}]})});
  const app=makeApp(storage),api=app.window.NOUX_PLAN_REVISION;
- assert.equal(await api.prepare({key}),true);
+ assert.equal(await api.prepare({key}),false,'Missing public final plan cannot activate an older route');
  assert.equal(api.active(),false);
  assert.equal(api.install(),false,'No approved data: do not touch original itinerary');
  const result=await api.importText(JSON.stringify(approved));
@@ -77,8 +77,11 @@ function makeApp(storage){
  const invalid={...approved,schema:'not-approved'};
  await assert.rejects(()=>api.importText(JSON.stringify(invalid)));
  assert.equal(storage.getItem('noux_trip_revision_v1'),ciphertext,'Invalid import never overwrites previous ciphertext');
- const paired=makeApp(storage);assert(await paired.window.NOUX_PLAN_REVISION.prepare({key}));
- assert(paired.window.NOUX_PLAN_REVISION.active(),'Reopened phone decrypts with existing key');
+ const paired=makeApp(storage);
+ assert.equal(await paired.window.NOUX_PLAN_REVISION.prepare({key}),false,'An old encrypted browser revision must never replace the published schedule');
+ paired.window.NOUX_APPROVED_WEEK=approved;
+ assert(await paired.window.NOUX_PLAN_REVISION.prepare({key}));
+ assert(paired.window.NOUX_PLAN_REVISION.active(),'Both phones use the published approved week');
  paired.window.NOUX_PLAN_REVISION.install();
  assert.equal(paired.window.NYC_PLAN.day('tue',{}).find(x=>x.id==='approved_20261124_00').title,'Approved first stop 1');
  const w={};vm.runInNewContext(coreSource,{window:w});
