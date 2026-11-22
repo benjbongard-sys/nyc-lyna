@@ -32,9 +32,14 @@ function anchor(){
   // immediately above the existing modal instead of covering the title.
   const modal=settings.getBoundingClientRect();
   left=Math.max(7,Math.min(window.innerWidth-width-7,modal.right-width-14));
-  top=Math.max(5,modal.top-42);
+  top=Math.max(68,modal.top+58);
  }
- TRIGGER.textContent=narrow?'Sync':'Shared / offline';
+ // Keep the Settings-only action within the iPhone's tappable viewport,
+  // even if the native Settings modal opens close to the browser notch.
+  const availableHeight=Number(window.innerHeight)||760;
+  left=Math.max(7,Math.min(window.innerWidth-width-7,left));
+  top=Math.max(64,Math.min(availableHeight-49,top));
+  TRIGGER.textContent=narrow?'Sync':'Shared / offline';
  TRIGGER.style.left=Math.round(left)+'px';
  TRIGGER.style.top=Math.round(top)+'px';
  TRIGGER.hidden=false;
