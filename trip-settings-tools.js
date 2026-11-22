@@ -107,6 +107,22 @@ function render(){
  approved.append(el('small','noux-trip-tool-state',
   plan.active&&plan.installed?'Approved itinerary active · all 5 days':(plan.error||'Reopen NOUX after unlocking to apply the latest plan.')));
  if(plan.active&&!plan.installed)approved.append(button('Reload current itinerary',()=>location.reload(),'noux-trip-tools-primary'));
+ const operations=el('section','noux-trip-tool-row');
+ operations.append(el('h3',null,'Routes, tickets & venue details'),
+  el('p',null,'Practical controls for the five approved days. Trip choices are final; these tools show each transfer, verified venue information and the current booking checklist.'));
+ const go=el('div','noux-trip-tools-actions');
+ go.append(button('Routes & live directions',()=>{
+  close();
+  if(!window.NOUX_ROUTE_GUIDE?.open?.())alert('Reopen the latest NOUX itinerary to view the routes.');
+ },'noux-trip-tools-primary'));
+ go.append(button('Tickets & reservations',()=>{
+  close();
+  if(!window.NOUX_BOOKING_DESK?.open?.())alert('The booking checklist is unavailable; reopen NOUX.');
+ },'noux-trip-tools-secondary'));
+ operations.append(go);
+ const ticketState=window.NOUX_BOOKING_DESK?.status?.();
+ if(ticketState)operations.append(el('small','noux-trip-tool-state',
+  ticketState.confirmed+' of '+ticketState.total+' pending booking and opening checks marked complete; already booked visits stay confirmed.'));
  const cache=el('section','noux-trip-tool-row');
  cache.append(el('h3',null,'Offline essentials'),el('p',null,'Save public app files and the encrypted trip vault on each phone. Map tiles and real-time MTA arrivals still need internet.'));
  const ready=OFFLINE?.ready||OFFLINE?.ok&&OFFLINE.vaultSaved&&OFFLINE.failed?.length===0;
@@ -124,7 +140,7 @@ function render(){
   close();window.NOUX_DEPARTURE?.open?.();
  },'noux-trip-tools-secondary'));
  const footer=el('p','noux-trip-tools-fine','This panel appears only inside the Trip Settings flow. No passwords, local choices or bookings are changed by opening it.');
- inner.replaceChildren(header,sync,approved,cache,packing,footer);
+ inner.replaceChildren(header,sync,approved,operations,cache,packing,footer);
 }
 function install(){
  if(INSTALLED)return true;

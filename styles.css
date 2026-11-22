@@ -517,3 +517,46 @@ body.noux-final-approved .hero-facts span:last-child{display:none!important}
 body.noux-final-approved .columns{grid-template-columns:minmax(0,1fr)!important}
 body.noux-final-approved .route-column{min-width:0;max-width:none;width:100%}
 body.noux-final-approved .mainnav button[hidden]{display:none!important}
+
+
+/* Compact body-owned operational tools; never inserted in React-managed nodes. */
+.noux-ticket-modal,.noux-routes-modal{position:fixed;inset:0;z-index:1510;overflow:auto;overscroll-behavior:contain;background:radial-gradient(ellipse at 88% 0%,rgba(127,84,107,.18),transparent 53%),#101720;color:#f4e8dc}
+.noux-ticket-modal[hidden],.noux-routes-modal[hidden]{display:none!important}
+.noux-ticket-content,.noux-routes-content{max-width:810px;margin:0 auto;padding:clamp(18px,4vw,42px) clamp(14px,4vw,36px) calc(78px + env(safe-area-inset-bottom,0px))}
+.noux-ticket-top,.noux-routes-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:16px}
+.noux-ticket-top h2,.noux-routes-head h2{font:400 clamp(28px,5vw,43px)/1.1 var(--serif);color:#f7e8d3;margin:8px 0 6px}
+.noux-ticket-top p,.noux-routes-head p{font-size:12px;line-height:1.6;color:#bcb4a8;max-width:600px;margin:0}
+.noux-ticket-top small,.noux-routes-head small{color:#dab783;letter-spacing:.12em;font-size:9px}
+.noux-ticket-modal button,.noux-routes-modal button{font-size:12px;min-height:39px}
+.noux-ticket-secondary,.noux-routes-close{background:transparent;color:#d7cab9;border:1px solid #6a5b4d;padding:9px 12px;border-radius:9px;flex:0 0 auto}
+.noux-ticket-days,.noux-routes-days{display:flex;gap:7px;overflow-x:auto;padding:8px 0 13px;scrollbar-width:thin}
+.noux-ticket-day,.noux-routes-day{border:1px solid #51473f;background:#24272f;color:#eee2d1;border-radius:20px;padding:8px 13px;white-space:nowrap}
+.noux-ticket-day.active,.noux-routes-day.active{border-color:#dbc093;background:#4b3d34}
+.noux-ticket-section{border-top:1px solid var(--line);padding-top:6px;margin-top:14px}
+.noux-ticket-section h3{font:400 21px var(--serif);margin:12px 0;color:#f8e7d1}
+.noux-ticket-item{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid rgba(225,206,181,.12);padding:13px 1px}
+.noux-ticket-info{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.noux-ticket-info strong{font-size:13px;font-weight:650}
+.noux-ticket-info small{font-size:11px;line-height:1.55;color:#c9bbaf}
+.noux-ticket-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.noux-ticket-check{display:flex;align-items:center;gap:8px;font-size:11px;white-space:nowrap;cursor:pointer}
+.noux-ticket-check input{accent-color:#d9bd8f;width:18px;height:18px}
+.noux-ticket-link,.noux-route-live,.noux-route-source{color:#e2c798;font-size:11px;text-decoration:underline;text-underline-offset:3px}
+.noux-ticket-footer{padding:16px 0 0;display:flex;flex-direction:column;gap:12px;color:#c9bbaf}
+.noux-ticket-footer small{line-height:1.5}
+.noux-ticket-primary,.noux-routes-primary{border:1px solid #d7b88d;background:#d7b88d;color:#171b24;border-radius:9px;padding:10px 14px;font-weight:750}
+.noux-routes-services{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid rgba(220,191,151,.25);border-radius:11px;background:rgba(110,83,57,.1);padding:11px 13px;margin-bottom:15px}
+.noux-routes-services small{flex:1;min-width:180px;font-size:11px;color:#bdb4a8;line-height:1.5}
+.noux-route-item{border-bottom:1px solid rgba(232,221,200,.15);padding:14px 0}
+.noux-route-item-top{display:flex;align-items:flex-start;gap:12px}
+.noux-route-item-top strong{font-size:13px;line-height:1.45;font-weight:650}
+.noux-route-index{font-size:10px;color:#cfb388;min-width:21px;margin-top:3px}
+.noux-route-address{display:block;color:#aeb5be;font-size:11px;margin:5px 0 0 33px;line-height:1.5}
+.noux-route-leg,.noux-route-context{margin:9px 0 0 33px;display:flex;flex-direction:column;gap:4px;border-left:2px solid rgba(217,181,131,.5);padding:4px 0 4px 13px}
+.noux-route-leg b{font-size:12px;color:#ecd8b8}
+.noux-route-leg small,.noux-route-context small{font-size:10px;color:#bdb5aa}
+.noux-route-context{border-color:rgba(158,205,187,.35)}
+.noux-route-context p{margin:2px 0;font-size:11px;line-height:1.6;color:#d4c8bb}
+.noux-route-context .noux-route-hours{color:#d2c49e;font-weight:700}
+.noux-route-actions{margin:7px 0 0 33px;display:flex;gap:16px;flex-wrap:wrap}
+@media(max-width:560px){.noux-ticket-item{flex-direction:column;align-items:stretch}.noux-ticket-actions{flex-direction:row;justify-content:space-between;align-items:center}.noux-ticket-check{white-space:normal}.noux-ticket-top h2,.noux-routes-head h2{font-size:29px}}

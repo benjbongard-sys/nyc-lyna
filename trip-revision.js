@@ -84,6 +84,62 @@ async function importFile(file){
  return importText(await file.text());
 }
 function minutes(s){return Number(s?.slice(0,2))*60+Number(s?.slice(3,5))}
+/* Geographic, scheduled leg estimates. Google Maps opens current navigation;
+   distances shown in NOUX itself are never represented as live traffic. */
+function distance(a,b){
+ if(!a||!b||![a.lat,a.lng,b.lat,b.lng].every(Number.isFinite))return NaN;
+ const rad=Math.PI/180,lat=(b.lat-a.lat)*rad,lon=(b.lng-a.lng)*rad;
+ const h=Math.sin(lat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(lon/2)**2;
+ return 12742*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function legsFor(events){
+ const p=window.NYC_DATA?.P||{},out=[],v=Array.isArray(events)?events:[];
+ for(let i=1;i<v.length;i++){
+  const from=v[i-1],to=v[i],a=p[from.place],b=p[to.place],km=distance(a,b);
+  if(!Number.isFinite(km)||km<0.07)continue;
+  const mode=a.kind==='airport'||b.kind==='airport'?'driving':km<=1.05?'walking':'transit';
+  const across=/brooklyn/i.test(a.area||'')!==/brooklyn/i.test(b.area||'');
+  const estimate=mode==='driving'?Math.max(45,Math.min(105,Math.ceil(36+km*1.6))):
+   mode==='walking'?Math.max(3,Math.ceil(km*1.32/4.6*60)+2):
+   Math.max(16,Math.min(78,Math.ceil(14+km*4.6+(across?9:0))));
+  let slack=to.kind==='travel'?minutes(to.end)-minutes(to.start):minutes(to.start)-minutes(from.end);
+  if(slack< -720)slack+=1440;
+  out.push({from,to,km:Math.round(km*100)/100,mode,estimate,slack,
+   warning:slack+4<estimate?'tight':'ok',source:'geographic estimate, not live'});
+ }
+ return out;
+}
+function priorPlace(target){
+ if(!DOC||!target?.startsWith('noux_'))return null;
+ const id=target.slice(5);
+ for(const key of Object.keys(DATES)){
+  const arr=DOC.days[DATES[key]]?.events||[];
+  for(let i=0;i<arr.length;i++){
+   if(arr[i].place!==id)continue;
+   for(let j=i-1;j>=0;j--)if(arr[j].place!==id)return 'noux_'+arr[j].place;
+  }
+ }
+ return null;
+}
+function directions(from,to,mode){
+ if(to==='noux_pier')return 'https://www.google.com/maps/search/?api=1&query='+
+   encodeURIComponent('Cruise boarding pier on ticket voucher New York');
+ const p=window.NYC_DATA?.P||{};
+ if(!p[to])return '';
+ let origin=from;
+ // The private core still asks for "sanctuary → current venue" on every card.
+ // Correct that call to the previous APPROVED stop, not the hotel.
+ if((from==='sanctuary'||from==='hotel')&&to?.startsWith('noux_'))
+  origin=priorPlace(to)||'noux_hotel';
+ if(!p[origin])origin='noux_hotel';
+ if(!p[origin]?.address||!p[to]?.address)return '';
+ // Legacy event cards always pass "transit", even for a 5-minute walk.
+ const km=distance(p[origin],p[to]),best=mode==='walking'||mode==='driving'?mode:
+  (Number.isFinite(km)&&km<=1.05?'walking':'transit');
+ return 'https://www.google.com/maps/dir/?'+new URLSearchParams({
+  api:'1',origin:p[origin].address,destination:p[to].address,
+  travelmode:best});
+}
 function finalEvents(day,choices,previous){
  const date=DATES[day];if(!date||!DOC?.days?.[date])return previous;
  // The approved final-day route is fixed, with no alternative selection.
@@ -92,7 +148,17 @@ function finalEvents(day,choices,previous){
   const e={id:x.id,start:x.start,end:x.end,title:x.title,kind:x.kind,status:x.status,
    detail:String(x.detail||''),place:'noux_'+x.place};
   if(x.url)e.url=x.url;
-  if(x.status==='ticket-to-check'&&!/not booked|not purchased|to book/i.test(e.detail))
+  if(['ticket-to-check','hours-to-check','proposed'].includes(x.status)&&window.NOUX_BOOKING_DESK?.confirmed?.(e.id)){
+   if(x.status==='hours-to-check'){e.status='proposed';e.detail=(e.detail+' Opening hours checked manually.').trim();}
+   else {
+    e.status='booked';
+    e.detail=String(x.detail||'')
+     .replace(/tickets? (?:are |is )?not (?:yet )?(?:assumed )?(?:purchased|booked|confirmed)\.?/ig,'')
+     .replace(/(?:not yet confirmed|not booked|not purchased|not reserved|not assumed purchased)\.?/ig,'')
+     .replace(/\s{2,}/g,' ').trim();
+    e.detail=(e.detail+' Manually confirmed in Tickets & reservations.').trim();
+   }
+  }else if(x.status==='ticket-to-check'&&!/not booked|not purchased|to book/i.test(e.detail))
    e.detail=(e.detail+' Ticket or reservation not yet confirmed.').trim();
   if(x.source_status==='conditional')e.detail=(e.detail+' Weather or holiday dependent.').trim();
   return e;
@@ -157,6 +223,43 @@ function install(){
    if(!DATA.WISHES.some(x=>Array.isArray(x)&&key(x[0]).includes(short)))DATA.WISHES.push(w);
   }
  }
+ // Reflect chosen stops in the existing native wishlist. Keep any other
+ // traveller-created wishes; the optional ARTE MUSEUM remains unassigned.
+ if(Array.isArray(DATA.WISHES)){
+  const curated=[
+   [['butterfly vivarium'],'Butterfly Vivarium','art','tue'],
+   [['guggenheim'],'Guggenheim Museum','art','tue'],
+   [['villa albertine','albertine books'],'Villa Albertine & Albertine Books','culture','tue'],
+   [['hudson vu'],'Hudson VU Rooftop','view','tue'],
+   [['reuben james','blue note'],'Reuben James · Blue Note','music','tue'],
+   [['nypl','new york public library'],'NYPL Schwarzman Building','culture','wed'],
+   [['bryant park'],'Bryant Park Winter Village','culture','wed'],
+   [['chelsea market'],'Chelsea Market','food','wed'],
+   [['lobster place'],'Lobster Place · lobster roll','food','wed'],
+   [['whitney'],'Whitney Museum','art','wed'],
+   [['little island'],'Little Island','culture','wed'],
+   [['domino park'],'Domino Park','view','wed'],
+   [['awoke vintage'],'Awoke Vintage','culture','wed'],
+   [['stella dallas','10 ft single'],'Stella Dallas vintage','culture','wed'],
+   [['louie vega'],'Louie Vega · Flashback','music','wed'],
+   [['grand central'],'Grand Central Terminal','culture','thu'],
+   [['mercer labs'],'Mercer Labs','art','thu'],
+   [['sadie s','sadies'],'Sadie’s Seaport','food','thu'],
+   [['daydream','balloon museum'],'DAYDREAM · Balloon Museum','art','thu'],
+   [['nubeluz'],'Nubeluz','view','thu'],
+   [['dumbo'],'DUMBO Waterfront','view','fri'],
+   [['brooklyn bridge'],'Brooklyn Bridge · daytime crossing','view','fri'],
+   [['golden diner'],'Golden Diner','food','fri'],
+   [['rough trade'],'Rough Trade Below','culture','fri']
+  ];
+  const norm=t=>String(t||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  for(const [aliases,title,category,day] of curated){
+   const found=DATA.WISHES.find(row=>Array.isArray(row)&&
+    !/\bsunrise\b/i.test(String(row[0]))&&aliases.some(a=>norm(row[0]).includes(norm(a))));
+   if(found){found[2]=day;found[3]='core'}
+   else DATA.WISHES.push([title,category,day,'core']);
+  }
+ }
  // All five days were approved. Archive obsolete itinerary decision cards.
  // The final-day route is immutable in the approved private manifest.
  if(Array.isArray(DATA.CHOICES))DATA.CHOICES.splice(0,DATA.CHOICES.length);
@@ -173,6 +276,8 @@ function install(){
  next.__nouxApprovedRevision=true;
  WRAPPED=next;PLAN.day=next;
  // Legacy choice-conflict warnings refer to retired Thursday decisions.
+ PLAN.legs=legsFor;
+ PLAN.routeUrl=directions;
  PLAN.findConflicts=()=>[];
  INITIALISED=true;
  return true;

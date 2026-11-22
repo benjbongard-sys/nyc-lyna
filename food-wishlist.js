@@ -9,6 +9,21 @@
   // Verified public branch details, 21 Nov 2026. All hours are standard
   // published hours, NOT live availability. Thanksgiving rules vary.
   const picks=[
+    {id:'goldendiner',name:'Golden Diner · honey butter pancakes',aliases:['golden diner'],must:true,
+      venue:'Golden Diner · Two Bridges',area:'Two Bridges / Chinatown',address:'123 Madison St, New York, NY 10002, USA',
+      hours:'Typical posted hours 09:00–22:00; Thanksgiving-week exceptions may differ',
+      regular:'Usually 09:00–22:00 (verify holiday)',friday:'Friday 27: traveller confirmed open; published holiday directories conflict, check with the diner',
+      website:'https://www.goldendinerny.com/dine',source:'Official Golden Diner reservation page; holiday check from traveller',
+      days:['fri'],minutes:60,holiday:'Friday 27 open per traveller; holiday hours conflict across listings',
+      note:'Approved Friday 13:00 lunch immediately after the Brooklyn Bridge crossing. Honey butter pancakes are the signature; reservations or a queue buffer are strongly recommended before the fixed JFK transfer.'},
+    {id:'sadies',name:"Sadie's Seaport · Thanksgiving brunch",aliases:["sadie's","sadies seaport","sadies"],must:true,
+      venue:"Sadie's · Seaport",area:'South Street Seaport',address:'19 Fulton St, New York, NY 10038, USA',
+      hours:'Standard opening varies; Thanksgiving brunch confirmed 10:00–15:00',
+      regular:'Check official daily hours',thursday:'Thanksgiving Thu 26: brunch 10:00–15:00 (Seaport official)',
+      website:'https://www.sadies.nyc/',source:'The Seaport official Thanksgiving 2026 programme',
+      days:['thu'],minutes:60,holiday:'Thanksgiving: brunch 10:00–15:00',
+      note:'Approved Thursday 13:10 lunch between Mercer Labs and DAYDREAM, no cross-town detour. Fried chicken sandwich and skillet banana bread. A table is not yet confirmed.'},
+
     {id:'shakeshack',name:"Shake Shack · ShackBurger & fries",aliases:["shake shack"],must:true,
       venue:'Shake Shack · Theater District',area:'Theater District',address:'691 8th Ave, New York, NY 10036, USA',
       hours:'Daily 10:00–03:00 (next day)',regular:'10:00–03:00 (+1)',website:'https://shakeshack.com/location/theater-district',
