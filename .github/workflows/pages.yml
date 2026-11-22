@@ -56,6 +56,7 @@ jobs:
           node scripts/test_trip_revision.js
           node scripts/test_direct_plan.js
           node scripts/test_final_services.js
+          node scripts/test_integrity_audit.js
           node scripts/test_map_filter.js
           node scripts/test_explorer_mobile.js
           node scripts/test_offline_worker.js
