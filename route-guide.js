@@ -12,7 +12,7 @@ const CONTEXT={
  tacos:{hours:'Typical weekday service until late evening; confirm Thanksgiving exceptions',note:'A nearby quick-food alternative for Monday around 20:00. This is not a reserved dinner; the actual chosen food stop can be Shake Shack or 375° instead.',source:'Los Tacos No. 1 branch listing'},
  dear:{hours:'Monday 23 November · reservation at 21:15',note:'Dear Irving on Hudson cocktails for two are already booked. Allow transfer time from the quick dinner; a view/window table is not guaranteed.',source:'Traveller-confirmed reservation'},
  mables:{hours:'Regular posted dinner hours; Thanksgiving-week exceptions possible',note:'Williamsburg BBQ is an option, not a fixed reservation. Do not add a separate trip across the river just to eat here.',source:'Mable’s Smokehouse website'},
- pier:{hours:'Not verified',note:'The booked cruise is at 16:00. Consult the voucher for the ACTUAL pier and boarding cutoff; the current waterfront map point is only a placeholder.',source:'Booking voucher required'},
+ pier:{hours:'Mon 23 · meet 15:40 · departure 16:00',note:'Your cruise confirmation specifies Pier 79, Slip 2, at the NY Waterway West Midtown Ferry Terminal, 459 12th Avenue / West 39th Street. Aim to arrive about 15:25 and go to Slip 2 by 15:40. The departure is at 16:00. Do not confuse this terminal with nearby Pier 78.',source:'Traveller-supplied cruise confirmation; terminal address verified with NY Waterway',sourceUrl:'https://www.nywaterway.com/midtownw39thterminal.aspx'},
  amnh:{hours:'Check museum and Butterfly Vivarium timed admission',note:'10:30 visit. The Vivarium requires a separate timed ticket.',source:'AMNH official visitor information'},
  gugg:{hours:'Regular museum hours; holiday exceptions possible',note:'Focused 13:30–14:40 visit. The 14:00 architecture talk is optional if offered that day.',source:'Guggenheim official visiting information'},
  albertine:{hours:'Check 24 November opening and ballroom access',note:'The ceiling artwork is not a guarantee of access to the ballroom.',source:'Albertine / Villa Albertine'},
@@ -63,12 +63,9 @@ function dayContent(day){
    make('strong',null,e.start+'–'+e.end+' · '+e.title));
   card.append(top);
   if(place)card.append(make('small','noux-route-address',place.address||place.area||'Location not specified'));
-  // The published cruise marker is a placeholder, NOT an actual pier.
-   // Never offer its inferred route duration as boarding instructions.
-   if(e.place==='noux_pier'){
-    card.append(make('p','noux-route-pier-warning','BOARDING PIER NOT VERIFIED. Check the exact pier printed on the cruise voucher before leaving the hotel. No travel estimate is shown for this placeholder.'));
-   }
-   const legs=e.place==='noux_pier'?[]:byEvent[e.id]||[];
+  // Pier 79 is now verified from the booking confirmation, so route
+  // instructions and approximate transfer legs can be shown normally.
+  const legs=byEvent[e.id]||[];
   for(const l of legs){
    const leg=make('div','noux-route-leg');
    const mode=l.mode==='walking'?'Walk':l.mode==='driving'?'Car / coach':'Subway / transit';
