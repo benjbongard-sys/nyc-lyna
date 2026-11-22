@@ -276,11 +276,11 @@
    summary.append(element('h3',null,'Reservations & tickets'));
    if(state){
     var pending=Math.max(0,(Number(state.total)||0)-(Number(state.confirmed)||0));
-    summary.append(element('p','noux-help',pending+' booking or opening checks remain. Already-booked events and arranged transport stay confirmed.'));
+    summary.append(element('p','noux-help',pending+' booking, admission or opening checks remain. '+(state.waitlisted?'Louie Vega: ON WAITLIST, admission not guaranteed. ':'')+'Confirmed bookings and arranged transport remain confirmed.'));
     var rows=typeof bookings.records==='function'?bookings.records():[];
     var pendingRows=rows.filter(function(r){return !r.confirmed&&!['booked','arranged'].includes(r.kind)}).slice(0,4);
     pendingRows.forEach(function(item){var row=element('div','noux-explorer-wish');
-      row.append(element('span',null,item.title),element('small',null,'To check'));summary.append(row)});
+      row.append(element('span',null,item.title),element('small',null,item.kind==='waitlist'?'Waitlisted · no guaranteed entry':'To check'));summary.append(row)});
    }else summary.append(element('p','noux-help','Review ticket and reservation status in Trip Settings.'));
    var actions=element('div','noux-explorer-actions');
    function nativeNav(pattern){var b=Array.from(document.querySelectorAll('.topbar .mainnav button')).find(function(x){return pattern.test(x.textContent||'')});if(b)b.click()}
