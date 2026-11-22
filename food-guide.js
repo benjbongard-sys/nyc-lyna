@@ -49,6 +49,7 @@ function directions(p){
 function publishedHours(p){
  if(DAY==='fri'&&p.friday)return p.friday;
  if(DAY==='thu'){
+  if(p.thursday)return p.thursday;
   if(/^CLOSED/i.test(p.holiday||''))return 'Closed on Thanksgiving (official)';
   if(/^Thanksgiving: closes at/i.test(p.holiday||''))return p.holiday;
   return 'Thanksgiving hours not confirmed · check before travelling';
@@ -58,7 +59,7 @@ function publishedHours(p){
 function freshStatus(){
  const list=catalogue();
  const matched=list.filter(p=>p.address&&p.website).length;
- return matched+' verified branch profiles · checked against published information on 21 Nov 2026 · times shown in New York EST';
+ return matched+' mapped Food profiles · reviewed against published information by 22 Nov 2026 · holiday exceptions and live availability require venue confirmation · New York EST';
 }
 function renderCard(p){
  const card=el('article','noux-food-card'+(SELECTED===p.id?' noux-food-selected':''));
