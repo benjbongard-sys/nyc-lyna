@@ -223,8 +223,67 @@
     drawer.replaceChildren(head,info,actions);
    }
   }
+  // The approved five-day itinerary no longer has route decisions. Keep
+  // Explore strictly operational: real scheduled days and existing tools.
+  function drawApproved(){
+   var choices=currentChoices(),plans=allDays(choices);
+   var header=element('div','noux-explorer-head'),heading=element('div');
+   heading.append(element('small','noux-kicker','NOUX / APPROVED TRIP'),element('h2',null,'Our New York, ready.'));
+   header.append(heading,press('noux-explorer-close','×',closeDrawer));
+   var intro=element('p','noux-explorer-intro','Five approved days, one itinerary. Plans and bookings stay in their original tabs. No route decisions left to make.');
+   var ny=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
+   var parts={};ny.forEach(function(x){parts[x.type]=x.value});
+   var date=parts.year+'-'+parts.month+'-'+parts.day,t=Number(parts.hour)*60+Number(parts.minute);
+   var currentDay=days.find(function(d){return DATA.DATES?.[d]===date});
+   var live=element('div','noux-explorer-now');
+   live.append(element('small',null,currentDay?'NEXT PLANNED STOP · NEW YORK '+parts.hour+':'+parts.minute:'NEW YORK LOCAL TIME · '+parts.hour+':'+parts.minute));
+   if(currentDay){
+    var upcoming=(plans[currentDay]||[]).find(function(ev){
+     var start=minute(ev.start),end=minute(ev.end);
+     if(!Number.isFinite(start)||!Number.isFinite(end))return false;
+     if(end<start)end+=1440;
+     return end>=t;
+    });
+    live.append(element('b',null,upcoming?upcoming.start+' · '+upcoming.title:'All scheduled stops for today are complete'));
+    live.append(press('noux-explorer-link','View today’s itinerary',function(){closeDrawer();goTo(currentDay)}));
+   }else{
+    var future=days.find(function(d){return DATA.DATES?.[d]>=date});
+    live.append(element('b',null,future?'Next: '+(DATA.DAYS||[]).find(function(x){return x[0]===future})?.[2]+' · '+(plans[future]?.[0]?.title||'Day itinerary'):'Your approved New York itinerary is available.'));
+   }
+   var head=element('h3',null,'The five approved days');
+   var tabs=element('div','noux-explorer-days');
+   days.forEach(function(d){
+    var count=(plans[d]||[]).filter(function(e){return !['travel','logistics','recovery','flight'].includes(String(e.kind||''))}).length;
+    var dateRow=(DATA.DAYS||[]).find(function(x){return x[0]===d});
+    var btn=press(currentDay===d?'is-selected':'',dateRow?dateRow[2]:labels[d],function(){closeDrawer();goTo(d)});
+    btn.appendChild(element('small',null,count+' planned stops'));tabs.appendChild(btn);
+   });
+   var summary=element('div','noux-explorer-approved-summary');
+   var bookings=window.NOUX_BOOKING_DESK;
+   var state=typeof bookings?.status==='function'?bookings.status():null;
+   summary.append(element('h3',null,'Reservations & tickets'));
+   if(state){
+    var pending=Math.max(0,(Number(state.total)||0)-(Number(state.confirmed)||0));
+    summary.append(element('p','noux-help',pending+' booking or opening checks remain. Already-booked events and arranged transport stay confirmed.'));
+    var rows=typeof bookings.records==='function'?bookings.records():[];
+    var pendingRows=rows.filter(function(r){return !r.confirmed&&!['booked','arranged'].includes(r.kind)}).slice(0,4);
+    pendingRows.forEach(function(item){var row=element('div','noux-explorer-wish');
+      row.append(element('span',null,item.title),element('small',null,'To check'));summary.append(row)});
+   }else summary.append(element('p','noux-help','Review ticket and reservation status in Trip Settings.'));
+   var actions=element('div','noux-explorer-actions');
+   function nativeNav(pattern){var b=Array.from(document.querySelectorAll('.topbar .mainnav button')).find(function(x){return pattern.test(x.textContent||'')});if(b)b.click()}
+   actions.append(
+    press('noux-explorer-primary','Open all-stops map',function(){closeDrawer();nativeNav(/all.stops map/i)}),
+    press('noux-explorer-secondary','Open Wishlist',function(){closeDrawer();nativeNav(/wish list/i)}),
+    press('noux-explorer-secondary','Routes & directions',function(){closeDrawer();if(!window.NOUX_ROUTE_GUIDE?.open?.())nativeNav(/daily itinerary/i)}),
+    press('noux-explorer-secondary','Tickets & reservations',function(){closeDrawer();if(!window.NOUX_BOOKING_DESK?.open?.())nativeNav(/daily itinerary/i)})
+   );
+   var footer=element('p','noux-help','Extra Wishlist places remain optional. Confirm the cruise departure pier from your voucher and check Thanksgiving-specific opening hours.');
+   drawer.replaceChildren(header,intro,live,head,tabs,summary,actions,footer);
+  }
   function drawContent(){
    if(!open)return;
+   if(window.NOUX_PLAN_REVISION?.active?.()){drawApproved();return}
    var choices=currentChoices(),plans=allDays(choices),wish=wishList(),done=wish.filter(function(w){return covered(w,plans)});
    var miss=wish.filter(function(w){return !covered(w,plans)});
    var head=element('div','noux-explorer-head');
