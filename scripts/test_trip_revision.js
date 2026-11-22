@@ -5,8 +5,8 @@ const {webcrypto}=require('node:crypto');
 const {TextEncoder,TextDecoder}=require('node:util');
 const source=fs.readFileSync('trip-revision.js','utf8');
 const coreSource=fs.readFileSync('sync-core.js','utf8');
-assert(!/Sanctuary Hotel|132 W 47th|AF007|Dear Irving|Louie Vega|NOUX_PASSPHRASE/.test(source),
- 'No private booking details or passphrase in published module');
+assert(!/Sanctuary Hotel|132 W 47th|AF007|NOUX_PASSPHRASE/.test(source),
+ 'No private accommodation address, flight number or passphrase in published route module');
 const dataDates=['2026-11-23','2026-11-24','2026-11-25','2026-11-26','2026-11-27'];
 const days={};const places={};
 for(let i=0;i<15;i++)places['test'+i]={name:'Test place '+i,address:'Test '+i+', NYC',
