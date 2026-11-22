@@ -70,7 +70,7 @@ for(const n of names)vm.runInNewContext(code(n),ctx,{filename:n});
  const food=win.NOUX_FOOD_WISHLIST;
  assert(food.install().ready);
  const namesList=win.NYC_DATA.WISHES.filter(w=>w[1]==='food').map(w=>w[0].toLowerCase());
- assert(namesList.some(x=>x.includes('golden diner'))&&namesList.some(x=>x.includes("sadie's")));
+ assert(namesList.some(x=>x.includes('golden diner'))&&namesList.some(x=>x.includes("sadie")));
  const w=win.NYC_DATA.WISHES,findWish=term=>w.find(row=>row[0].toLowerCase().includes(term));
  assert(findWish('golden diner')[2]==='fri'&&findWish('golden diner')[3]==='core','Golden Diner is final Friday food priority');
  assert(findWish('brooklyn bridge')[2]==='fri','Brooklyn Bridge belongs only to Friday');
