@@ -3,7 +3,7 @@
  * No decryption, passwords, localStorage, live subway feeds or remote API caching.
  */
 'use strict';
-const VERSION='20261122-finalguard2';
+const VERSION='20261123-pierphotos1';
 const SHELL='noux-shell-'+VERSION;
 const VAULT='noux-encrypted-vault-'+VERSION;
 const ASSETS=[
@@ -21,6 +21,10 @@ const ASSETS=[
  './lib/maplibre-gl.js','./lib/maplibre-gl.css',
  './assets/photo-index.js','./assets/nyx-icon.svg','./worker-config.js'
 ];
+// The illustrated offline pack includes each scheduled destination photograph.
+// No personal uploads, decrypted vault contents or credentials are cached.
+const REQUIRED_PHOTOS=["hotel","jfk","pier79","times","tacos","dear","butterfly","guggenheim","albertine","hudsonvu","bluenote","nypl","bryant","lobsterplace","whitney","little","domino","awoke","stella","mables","superior","grandcentral","mercer","sadies","daydream","colbo","nubeluz","dumbo","bridge","golden","rough"];
+ASSETS.push(...REQUIRED_PHOTOS.map(key=>'./assets/photos/'+key+'.jpg'));
 const prefix=new URL(self.registration.scope);
 const vaultUrl=new URL('./assets/private.vault.json',prefix);
 const assetUrls=new Set(ASSETS.map(x=>new URL(x,prefix).href));
@@ -74,14 +78,18 @@ async function savePack(){
  const shell=await caches.open(SHELL);
  let publicCount=0;
  const failed=[];
- for(const path of ASSETS){
-  const url=new URL(path,prefix);
-  try{
-   const response=await fetch(new Request(url.href,{cache:'reload',credentials:'same-origin'}));
-   if(!response.ok||response.type==='opaque')throw Error('Unavailable: '+response.status);
-   await shell.put(url.href,response.clone());
-   publicCount++;
-  }catch(_){failed.push(path)}
+ // Fetch photos and scripts in small parallel batches to keep mobile downloads
+ // viable on slower networks without overloading the browser.
+ for(let i=0;i<ASSETS.length;i+=4){
+  await Promise.all(ASSETS.slice(i,i+4).map(async path=>{
+   const url=new URL(path,prefix);
+   try{
+    const response=await fetch(new Request(url.href,{cache:'reload',credentials:'same-origin'}));
+    if(!response.ok||response.type==='opaque')throw Error('Unavailable: '+response.status);
+    await shell.put(url.href,response.clone());
+    publicCount++;
+   }catch(_){failed.push(path)}
+  }));
  }
  let vaultSaved=false;
  try{
