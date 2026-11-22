@@ -5,6 +5,9 @@ const source=fs.readFileSync('explorer.js','utf8'),css=fs.readFileSync('styles.c
 new vm.Script(source,{filename:'explorer.js'});
 assert(css.includes('#noux-explorer-launch.noux-explorer-launch'),'Dedicated mobile Explore visibility CSS is included');
 assert(css.includes('bottom:calc(83px + env(safe-area-inset-bottom,0px))'),'Button clears Safari toolbar and home indicator');
+assert(css.includes('#noux-explorer-drawer.noux-explorer-drawer:not([hidden])'),'Mobile Explore uses a nonempty full-screen sheet');
+assert(css.includes('height:100dvh!important'),'Open sheet fills usable iPhone viewport');
+assert(css.includes('overflow-y:auto!important'),'Explore content scrolls inside the mobile sheet');
 class Node{
  constructor(tag){this.tagName=tag;this.className='';this.id='';this.textContent='';this.children=[];this.listeners={};this.style={};this.attrs={};this.hidden=false;this.classList={contains:k=>this.className.split(' ').includes(k)}}
  append(...items){this.children.push(...items)}
@@ -31,7 +34,8 @@ const document={
  querySelector:()=>null,
  addEventListener(){}
 };
-const context={window:{NYC_DATA:data,NYC_PLAN:{day:base},NOUX_PLAN_REVISION:{active:()=>true}},
+const context={window:{NYC_DATA:data,NYC_PLAN:{day:base},NOUX_PLAN_REVISION:{active:()=>true},
+ NOUX_CHOICES:{alternatives:()=>{throw Error('Retired Decisions is not initialised')}}},
  document,localStorage:storage,Array,Object,JSON,Date,Math,Intl,Set,Number,String,
  setTimeout:fn=>{fn();return 1},setInterval:()=>1};
 vm.runInNewContext(source,context,{filename:'explorer.js'});
@@ -46,6 +50,17 @@ assert(!launch.hidden,'Explore visible on iPhone');
 launch.click();
 assert.equal(drawer.hidden,false,'Explore opens drawer on iPhone');
 assert(drawer.children.length>4,'Drawer contains actual itinerary/wishlist sections');
+assert(!drawer.children.some(x=>x.textContent==='The five-day itinerary is still available. Open the schedule or Wishlist below.'),
+ 'Retired Decisions must not cause fallback or a blank drawer');
+launch.click();
+assert(drawer.hidden,'Close Explore restores main page');
+context.window.NOUX_DAY_AUDIT={pending:()=>{throw Error('Unrelated optional audit failure')}};
+launch.click();
+assert(!drawer.hidden,'Explore still opens after optional module failure');
+assert.equal(drawer.children.length,3,'A safe fallback replaces failed content, never the empty 40px strip');
+assert(drawer.children[1].textContent.includes('five-day itinerary'),'Fallback explains and links to the original itinerary');
+launch.click();
+delete context.window.NOUX_DAY_AUDIT;
 assert(explorer.ensure(),'Repeated ensure calls succeed without duplicates');
 assert.equal(body.children.filter(n=>n.id==='noux-explorer-launch').length,1,'No duplicate shortcuts');
 body.children=body.children.filter(n=>n!==launch);
