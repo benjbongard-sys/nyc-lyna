@@ -9,7 +9,7 @@ const ITEMS=[
  ['mon','04','Cruise · Golden Hour','booked','Pier 79, NY Waterway West Midtown Terminal (459 12th Ave), Slip 2. Arrive around 15:25; meeting/boarding at 15:40; sailing 16:00–18:00.','https://www.nywaterway.com/midtownw39thterminal.aspx'],
  ['mon','07','Dear Irving on Hudson · 21:15','booked','Table for two already reserved.','https://www.dearirving.com/'],
  ['tue','01','Butterfly Vivarium · 10:30','booked','Admission booked according to traveller; 10:30 remains the planned visit time. Check the ticket for the exact entry slot.','https://www.amnh.org/plan-your-visit'],
- ['tue','03','Guggenheim · 13:30','ticket','Museum admission; planned after AMNH.','https://www.guggenheim.org/plan-your-visit'],
+ ['tue','03','Guggenheim · 13:30','booked','Admission booked according to the traveller. 13:30 is the planned visit time; check the issued ticket for the exact entry slot.','https://www.guggenheim.org/plan-your-visit'],
  ['tue','06','Hudson VU · 16:30','booked','Rooftop reservation confirmed by traveller; 16:30 remains the planned arrival, subject to reservation details.','https://www.hudsonvunyc.com/reservations'],
  ['tue','09','Reuben James · Blue Note · 20:00','ticket','Official 20:00 show; doors 18:00, first-come seating and $20 minimum per person.','https://www.bluenotejazz.com/nyc/tm-event/reuben-james-featuring-chris-dave-and-david-dj-ginyard/'],
  ['wed','05','Whitney Museum · 13:10','ticket','Museum admission.','https://whitney.org/visit'],
@@ -108,5 +108,5 @@ function install(){
  document.addEventListener('keydown',e=>{if(OPEN&&e.key==='Escape')close()});
  INSTALLED=true;return true;
 }
-window.NOUX_BOOKING_DESK={install,open,close,confirmed,setConfirmed,status,records:()=>ITEMS.map(x=>({day:x[0],id:id(x),title:x[2],kind:x[3],confirmed:confirmed(id(x)),url:x[5]})),version:'2026.11.23-reservations2'};
+window.NOUX_BOOKING_DESK={install,open,close,confirmed,setConfirmed,status,records:()=>ITEMS.map(x=>({day:x[0],id:id(x),title:x[2],kind:x[3],confirmed:confirmed(id(x)),url:x[5]})),version:'2026.11.23-reservations3'};
 })();

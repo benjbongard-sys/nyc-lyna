@@ -54,11 +54,15 @@ for(const n of names)vm.runInNewContext(code(n),ctx,{filename:n});
  assert.equal(booking.confirmed('approved_20261127_09'),true,'Airport group coach arranged');
  for(const [eventId,label] of [
   ['approved_20261124_01','Davis Family Butterfly Vivarium'],
+  ['approved_20261124_03','Solomon R. Guggenheim Museum'],
   ['approved_20261124_06','Hudson VU'],
   ['approved_20261126_03','Mercer Labs']
  ]){
   assert.equal(booking.confirmed(eventId),true,label+' confirmed directly in default release');
  }
+ assert.equal(booking.status().bookedAlready,7,'Seven confirmed bookings include Tuesday Guggenheim');
+ assert(!booking.setConfirmed('approved_20261124_03',false),'Newly booked Guggenheim cannot be unchecked as if unpurchased');
+ assert.equal(win.NYC_PLAN.day('tue',{}).find(x=>x.id==='approved_20261124_03').status,'booked','Tuesday daily itinerary shows booked Guggenheim');
  assert.equal(booking.status().waitlisted,1,'Louie Vega is on waitlist, not an issued ticket');
  assert.equal(booking.confirmed('approved_20261125_13'),false,'Louie Vega waitlist never counts as confirmed entry');
  // A confirmation boolean saved under the OLD ticket model must not
