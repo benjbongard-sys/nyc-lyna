@@ -83,7 +83,7 @@ function finalEvents(day,choices,previous){
  const source=alternate||DOC.days[date].events;
  const rows=source.map(x=>{
   const e={id:x.id,start:x.start,end:x.end,title:x.title,kind:x.kind,status:x.status,
-   detail:String(x.detail||''),place:x.place};
+   detail:String(x.detail||''),place:'noux_'+x.place};
   if(x.url)e.url=x.url;
   if(x.status==='ticket-to-check'&&!/not booked|not purchased|to book/i.test(e.detail))
    e.detail=(e.detail+' Ticket or reservation not yet confirmed.').trim();
@@ -133,7 +133,7 @@ function install(){
  if(PLAN.day===WRAPPED)return true;
  const prev=PLAN.day.bind(PLAN);
  const next=function(day,choices){
-  const base=prev(day,choices);
+  let base=[];try{base=prev(day,choices)}catch(_){/* old planner must not block the approved plan */}
   if(!DOC)return base;
   const selection={...DATA.DEFAULT,...(choices||{})};
   const saved=(()=>{try{return JSON.parse(localStorage.getItem('nyc_lyna_trip_v6')||'{}')?.choices||{}}catch(_){return {}}})();
