@@ -7,7 +7,7 @@
 if(window.NOUX_SYNC_CORE)return;
 const RESERVED=new Set(['__proto__','prototype','constructor']);
 const PRIVATE=/pass(?:word|phrase)|secret|auth(?:orization)?|api.?token|private.?key/i;
-const STORE=/^nyc_lyna_trip_v\d+$|^noux_choice_journal_v\d+$|^noux_explore_pace_v\d+$|^(?:noux|nyc_lyna)[_-].*(?:custom|stops|pins|booking|wishes)|(?:^|[_-])custom[_-]?stops(?:[_-]|$)/i;
+const STORE=/^noux_trip_revision_v1$|^nyc_lyna_trip_v\d+$|^noux_choice_journal_v\d+$|^noux_explore_pace_v\d+$|^(?:noux|nyc_lyna)[_-].*(?:custom|stops|pins|booking|wishes)|(?:^|[_-])custom[_-]?stops(?:[_-]|$)/i;
 const CHECKLIST='@noux-departure';
 const own=(x,k)=>Object.prototype.hasOwnProperty.call(x,k);
 const plain=x=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&Object.prototype.toString.call(x)==='[object Object]';
