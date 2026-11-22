@@ -1,0 +1,31 @@
+name: Validate automatic NOUX final itinerary
+on:
+  push:
+    branches:
+      - fix/automatic-final-five-day-plan-20261122
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax and automatic approved routes
+        run: |
+          node --check approved-week.js
+          node --check trip-revision.js
+          node --check trip-settings-tools.js
+          node --check unlock.js
+          node scripts/test_direct_plan.js
+          node scripts/test_trip_revision.js
+          node scripts/test_sync_core.js
+          node scripts/test_sync_client.js
+          node scripts/test_trip_settings_tools.js
+          node scripts/test_ui_slim.js
+          node scripts/test_offline_worker.js
+          node scripts/test_unlock_recovery.js
+      - name: Compile publication security checks
+        run: python -m py_compile scripts/check_public.py
