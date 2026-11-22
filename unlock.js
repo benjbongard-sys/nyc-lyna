@@ -136,41 +136,13 @@
    const scripts=JSON.parse(dec.decode(plain));
    if(!scripts['data.js']||!scripts['app.js'])throw Error('Something went wrong. Try refreshing the page.');
     // Open approved itinerary only with the in-memory AES vault key.
-    try{await window.NOUX_PLAN_REVISION?.prepare({key})}catch(_){/* retain old plan if import is unreadable */}
+    // A partial release must not display the retired itinerary as a final plan.
+    const planReady=await window.NOUX_PLAN_REVISION?.prepare?.({key});
+    if(planReady!==true||!window.NOUX_PLAN_REVISION?.active?.())
+     throw Error('The approved trip could not be verified. Reconnect and reopen NOUX. Your saved data is unchanged.');
    unlocked=true;mark('Welcome. The city is opening…','success');bar.style.width='100%';
    screen.classList.add('unlocked');
    await new Promise(resolve=>setTimeout(resolve,1050));
-   // The 100th annual parade is public civic-event data; personal travel remains inside the vault.
-   function attachCentennialParade(){
-    const data=window.NYC_DATA, planner=window.NYC_PLAN;
-    if(!data || !data.P || !planner || typeof planner.day!=='function' || planner.__centennialParade)return;
-    const areaPoint=data.P.rockefeller || data.P.times;
-    if(!areaPoint)return;
-    data.P.centennial_parade={
-     ...areaPoint,
-     name:"100th Macy's Thanksgiving Day Parade",
-     area:'Midtown Manhattan',
-     address:'Sixth Avenue near Rockefeller Center, New York, NY, USA',
-     kind:'event'
-    };
-    const dayBefore=planner.day;
-    planner.day=function(day,choices){
-     const events=dayBefore.call(this,day,choices);
-     if(day!=='thu' || !Array.isArray(events) || events.some(e=>/macy.{0,20}parade|thanksgiving.{0,20}parade/i.test(String(e.title||''))))return events;
-     // Replace only conflicting optional early-Thursday plans, never confirmed bookings.
-     const retained=events.filter(e=>{
-      const start=String(e.start||''), end=String(e.end||'');
-      if(!start || !end || start>='11:30' || end<='09:15')return true;
-      return ['booked','arranged','confirmed'].includes(String(e.status||'').toLowerCase());
-     });
-     const parade=[
-      {id:'centennial_parade_walk',start:'09:15',end:'09:40',title:'Walk to Sixth Avenue · join the Thanksgiving crowds',place:'centennial_parade',detail:'Aim for public viewing near West 52nd Street from 09:40. Arriving after the first crowds means no kerbside/front-row view is guaranteed. Follow NYPD barriers; walking routes may be restricted.',kind:'travel',status:'proposed'},
-      {id:'centennial_parade_2026',start:'09:40',end:'11:15',title:"100th Macy's Thanksgiving Day Parade",place:'centennial_parade',detail:'The parade starts at 08:30 on the Upper West Side. Near Rockefeller Center the lead floats usually pass after 09:30, with more arriving throughout the morning. Shorter relaxed viewing; sightlines and exact timings are not guaranteed.',kind:'highlight',status:'public-event'}
-     ];
-     return retained.concat(parade).sort((a,b)=>String(a.start||'').localeCompare(String(b.start||'')));
-    };
-    planner.__centennialParade=true;
-   }
    // A successful render is authoritative. Unrelated network/image errors
    // must never turn a successfully decrypted itinerary into a login failure.
    let visualError=false;
@@ -182,8 +154,7 @@
     if(!scripts[name])throw Error('Unable to open a part of our itinerary: '+name);
     const el=document.createElement('script');el.textContent=scripts[name]+`\n//# sourceURL=noux-private-${name}`;document.head.appendChild(el);
     if(name==='data.js'){try{window.NOUX_FOOD_WISHLIST?.install()}catch(_){/* optional food additions must never break unlock */}}
-     if(name==='itinerary.js')attachCentennialParade();
-    if(name==='custom-stops.js'){
+         if(name==='custom-stops.js'){
      // Capture map markers before the private React map creates them. The
      // filter only changes the visibility of already-rendered map pins.
      try{window.NOUX_MAP_FILTER?.prepare()}catch(_){}
