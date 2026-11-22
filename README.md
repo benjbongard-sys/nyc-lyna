@@ -71,11 +71,11 @@ The code intentionally uses **body-owned modals and settings-only overlay contro
 
 The public `choice-orchestrator.js` and `day-audit.js` layers run only **after** decryption and read the existing private itinerary; they do not embed private reservations or the passphrase.
 
-- Wednesday defaults to a Manhattan-first afternoon, with optional Williamsburg skyline/oysters/vintage alternatives; a theatre performance and an indoor house-music event are independent selections.
+- The legacy, pre-import fallback offered several Wednesday routes; once the approved private itinerary is activated, its selected Wednesday route is fixed and the old route choices no longer appear.
 - The optimiser uses tighter photo and focused-gallery durations, clusters nearby stops, inserts honest transfer buffers, and retains dismissed choices in the Explorer's Second Chances / Route Checks sections.
 - The arrival-day booked cruise keeps a 60-minute pier transfer and 30-minute boarding window free of speculative extras. Exact pier and actual travel times are read from the booking, not inferred.
 - Holiday closures are screened for selected museums. A relaxed parade viewing window is preserved; it does not promise early front-row viewing.
-- The departure day preserves a Midtown shopping route while treating the **arranged guided coach around 17:00 on Friday 27 November** as fixed, with bags collected by 16:40 and guests in the lobby by 16:45. Confirm any adjustment directly with the group guide.
+- The departure day retains a fixed arranged airport transfer at approximately 17:00, with bags collected by 16:40 and arrival in the hotel lobby by 16:45. Final sightseeing stops are defined by the approved private itinerary. Confirm any transfer adjustment directly with the guide.
 - Five-day synthetic regression tests are run in `scripts/test_day_audit.js`, alongside existing choice, venue, routing and subway tests, as part of the Pages deployment workflow.
 
 **Important:** transfer estimates and venue hours are not live guarantees. Protected bookings survive conflicts, which are flagged for human resolution. Choice history and personal stops sync only after both devices join the same encrypted shared room; before pairing, all data stays on each device.
@@ -83,7 +83,7 @@ The public `choice-orchestrator.js` and `day-audit.js` layers run only **after**
 ## Final-day coach, sunrise and encrypted checklists
 
 - **Friday 27 November:** breakfast at the hotel from 07:00 to 10:00; check out **before 12:00**, leaving suitcases with hotel reception. The booked group transfer is by coach with a French-speaking guide, **approximately 17:00** from the hotel to JFK Terminal 1. The planner puts guests in the lobby by 16:45. This supersedes the earlier speculative noon/15:50 pickup. The private encrypted itinerary retains actual flight booking details.
-- **Brooklyn Bridge sunrise:** a non-ticketed photo-and-walking excursion can be selected for **Wednesday** (default, approximately 06:54 sunrise), **Friday** (approximately 06:56) or skipped. The proposed DUMBO waterfront photo session leads into a Brooklyn → Manhattan pedestrian bridge crossing; travel and dawn weather need rechecking.
+- **Legacy fallback only:** an optional sunrise walk appears before importing the final approved itinerary. The approved five-day plan disables that optional early-morning excursion and uses the privately selected daytime crossing instead.
 - After unlock, **Trip Settings → Shared / offline → Open checklists** opens the existing encrypted **Departure & gifts** checklist. It has separate Lyna/Benjamin ticks, editable souvenirs and Bought/Packed markers, curated shops and live Google Maps search. There is no extra permanent packing launcher.
 - All ticks and shopping notes are saved **encrypted locally with AES-GCM**. After the two phones have been paired, changes also synchronise through encrypted Cloudflare Durable Object storage, preserving Benjamin's and Lyna's independent checkboxes. Encrypted export/import remains available as a separate backup.
 - The shopping suggestions and France customs caveats are informational. Store inventory, special holiday hours, carrier baggage conditions and customs exemptions need verification before purchase.
