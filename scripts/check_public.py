@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 root=Path('_site')
-required=['index.html','unlock.js','explorer.js','food-wishlist.js','food-guide.js','decision-guide.js','trip-settings-tools.js','trip-revision.js','approved-week.js','booking-desk.js','route-guide.js','sw.js','venues.js','choice-orchestrator.js','day-audit.js','departure-kit.js','sync-core.js','sync.js','styles.css','assets/private.vault.json','assets/photo-index.js','assets/photos/skyline.jpg']
+required=['index.html','unlock.js','explorer.js','food-wishlist.js','food-guide.js','decision-guide.js','trip-settings-tools.js','trip-revision.js','approved-week.js','booking-desk.js','route-guide.js','map-filter.js','sw.js','venues.js','choice-orchestrator.js','day-audit.js','departure-kit.js','sync-core.js','sync.js','styles.css','assets/private.vault.json','assets/photo-index.js','assets/photos/skyline.jpg']
 for f in required:
  assert (root/f).is_file(),f'Missing required offline asset {f}'
 vault=json.loads((root/'assets/private.vault.json').read_text())
