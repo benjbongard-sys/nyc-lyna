@@ -135,6 +135,8 @@
    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(vault.iv),additionalData:enc.encode('NOUX-NYC-PRIVATE-V1')},key,b64(vault.ct));
    const scripts=JSON.parse(dec.decode(plain));
    if(!scripts['data.js']||!scripts['app.js'])throw Error('Something went wrong. Try refreshing the page.');
+    // Open approved itinerary only with the in-memory AES vault key.
+    try{await window.NOUX_PLAN_REVISION?.prepare({key})}catch(_){/* retain old plan if import is unreadable */}
    unlocked=true;mark('Welcome. The city is opening…','success');bar.style.width='100%';
    screen.classList.add('unlocked');
    await new Promise(resolve=>setTimeout(resolve,1050));
@@ -187,6 +189,7 @@
      // initial render. In basic mode, boot the decrypted private app alone.
      if(window.NOUX_EXPLORER){try{window.NOUX_EXPLORER.install()}catch(_){}}
      if(window.NOUX_VENUES){try{window.NOUX_VENUES.install()}catch(_){}}
+      if(window.NOUX_PLAN_REVISION?.active()){try{window.NOUX_PLAN_REVISION.install()}catch(_){}}
     }
    }
    $('root').hidden=false;screen.style.display='none';
@@ -200,8 +203,13 @@
     if(!basicMode){
      // Progressive enhancement *after* the first React paint. A bad extension
      // must never prevent the core planner from mounting.
-     try{window.NOUX_CHOICES?.install()}catch(_){}
-     try{window.NOUX_DAY_AUDIT?.install()}catch(_){}
+     if(window.NOUX_PLAN_REVISION?.active()){
+      // Do not reinsert the retired art, rooftop, club or sunrise routes.
+      try{window.NOUX_PLAN_REVISION.install()}catch(_){}
+     }else{
+      try{window.NOUX_CHOICES?.install()}catch(_){}
+      try{window.NOUX_DAY_AUDIT?.install()}catch(_){}
+     }
      try{window.NOUX_SUBWAY?.install()}catch(_){}
      // Do not force immediate React tab toggles during startup. Decisions refresh
      // naturally when the visitor opens the itinerary or changes a selection.

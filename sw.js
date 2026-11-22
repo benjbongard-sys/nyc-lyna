@@ -3,7 +3,7 @@
  * No decryption, passwords, localStorage, live subway feeds or remote API caching.
  */
 'use strict';
-const VERSION='20261122-login1';
+const VERSION='20261122-plan1';
 const SHELL='noux-shell-'+VERSION;
 const VAULT='noux-encrypted-vault-'+VERSION;
 const ASSETS=[
@@ -13,7 +13,7 @@ const ASSETS=[
  './departure-kit.js?v='+VERSION,'./sync-core.js?v='+VERSION,'./sync.js?v='+VERSION,
  './subway-map.js?v='+VERSION,'./food-wishlist.js?v='+VERSION,
  './food-guide.js?v='+VERSION,'./decision-guide.js?v='+VERSION,
- './trip-settings-tools.js?v='+VERSION,
+ './trip-settings-tools.js?v='+VERSION,'./trip-revision.js?v='+VERSION,
  './lib/react.min.js','./lib/react-dom.min.js',
  './lib/maplibre-gl.js','./lib/maplibre-gl.css',
  './assets/photo-index.js','./assets/nyx-icon.svg','./worker-config.js'
