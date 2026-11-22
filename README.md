@@ -18,6 +18,14 @@ The approved 23–27 November sightseeing route is now **loaded automatically as
 
 Both paired devices receive the new template from the published NOUX code on their next refresh/reopen. No booking was purchased or changed. The new native plan uses user-approved statuses: the previously booked cruise and cocktail are marked booked, while other tickets remain to be arranged by the travellers. There is no manual import, no Friday route choice, and no duplicate decisions panel. Public curated food details, maps, shared custom stops and gifts continue operating.
 
+## Explore mobile drawer recovery · 22 November 2026
+
+A real iPhone screenshot showed the Explore launcher but only a narrow, empty rounded strip at the bottom. **Root cause:** after automatic approval of the full five-day plan, the obsolete `NOUX_CHOICES` JavaScript module was still loaded but deliberately not initialised. `explorer.js` tried calling its `alternatives()` method, dereferenced a null internal DATA object, and threw *before* populating the drawer. The CSS positioned that empty drawer at the bottom, which made it look like a layout clipping problem.
+
+The corrected Explore code skips retired Decisions entirely for an approved itinerary, still shows day navigation/Wishlist/optional places, and catches unexpected rendering errors with usable **Open itinerary / Open Wishlist** fallback controls. On mobile, the open drawer is now a full-height, independently scrollable overlay with an accessible sticky close control, correct safe-area padding and no competing permanent buttons. All content remains attached outside React's managed root.
+
+The regression `scripts/test_explorer_mobile.js` explicitly simulates the retired Decisions module throwing if called, verifies the normal approved itinerary still displays, then injects an independent optional error to ensure a real fallback appears rather than an empty strip. `scripts/test_explorer.js` continues to protect the historical planning behaviour. The new public asset version is `20261122-explore2` and the offline shell version matches it. Physical Safari validation is still needed.
+
 ## All-stops Map filter + iPhone Explore availability (22 November 2026)
 
 - The existing **All-stops Map** now has a compact **Scheduled / All** pin control, with **Scheduled** selected by default. Scheduled uses all five approved `NYC_PLAN.day()` routes and their actual map coordinates, including any individually scheduled custom stop. **All** restores the unscheduled/Wishlist alternatives. The control changes marker visibility only; it does **not** remove saved places, modify the approved timetable or change calendar exports. The selected display mode is saved locally under `noux_map_filter_v1`. The control only appears while the native map is visible.
