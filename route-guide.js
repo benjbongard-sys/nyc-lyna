@@ -8,6 +8,10 @@
 if(window.NOUX_ROUTE_GUIDE)return;
 const DAYS={mon:'Mon 23',tue:'Tue 24',wed:'Wed 25',thu:'Thu 26',fri:'Fri 27'};
 const CONTEXT={
+ times:{hours:'Public outdoor district; individual venues have separate hours',note:'Evening walk after the booked harbour cruise. Follow pedestrian crossings and avoid treating Times Square as a ticketed attraction.',source:'NYC public streets / tourism context'},
+ tacos:{hours:'Typical weekday service until late evening; confirm Thanksgiving exceptions',note:'A nearby quick-food alternative for Monday around 20:00. This is not a reserved dinner; the actual chosen food stop can be Shake Shack or 375° instead.',source:'Los Tacos No. 1 branch listing'},
+ dear:{hours:'Monday 23 November · reservation at 21:15',note:'Dear Irving on Hudson cocktails for two are already booked. Allow transfer time from the quick dinner; a view/window table is not guaranteed.',source:'Traveller-confirmed reservation'},
+ mables:{hours:'Regular posted dinner hours; Thanksgiving-week exceptions possible',note:'Williamsburg BBQ is an option, not a fixed reservation. Do not add a separate trip across the river just to eat here.',source:'Mable’s Smokehouse website'},
  pier:{hours:'Not verified',note:'The booked cruise is at 16:00. Consult the voucher for the ACTUAL pier and boarding cutoff; the current waterfront map point is only a placeholder.',source:'Booking voucher required'},
  amnh:{hours:'Check museum and Butterfly Vivarium timed admission',note:'10:30 visit. The Vivarium requires a separate timed ticket.',source:'AMNH official visitor information'},
  gugg:{hours:'Regular museum hours; holiday exceptions possible',note:'Focused 13:30–14:40 visit. The 14:00 architecture talk is optional if offered that day.',source:'Guggenheim official visiting information'},
