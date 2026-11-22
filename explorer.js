@@ -331,5 +331,16 @@
   }
   return true;
  }
- window.NOUX_EXPLORER={install:install,version:'2026.11.15',mode:getMode};
+ // The private React app can mount after DOMContentLoaded on mobile.
+ // Always recheck the sole Explore shortcut after the first successful render.
+ function ensure(){
+  if(!READY||!document.body)return false;
+  if(!document.getElementById('noux-explorer-launch'))mount();
+  var trigger=document.getElementById('noux-explorer-launch');
+  if(!trigger)return false;
+  trigger.hidden=false;
+  trigger.removeAttribute('aria-hidden');
+  return true;
+ }
+ window.NOUX_EXPLORER={install:install,ensure:ensure,version:'2026.11.22-mobile1',mode:getMode};
 })();
