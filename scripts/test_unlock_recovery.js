@@ -47,7 +47,7 @@ async function boot(mode='immediate',basic=false){
   'app.js':mode==='empty'?'/* synthetic React mount failed */':
            mode==='delayed'?'/* React schedules a delayed render in the harness */':
            (mode==='warning'?'window.fire("error");':'')+
-           'document.getElementById("root").appendChild(Object.assign(document.createElement("section"),{textContent:"Our full visual New York itinerary is rendering and contains the complete trip."}));'
+           'document.getElementById("root").appendChild(Object.assign(document.createElement("section"),{textContent:'+JSON.stringify('')+'+'+(mode==='short'?JSON.stringify('NOUX is ready'):JSON.stringify('Our full visual New York itinerary is rendering and contains the complete trip.'))+'}));'
  };
  const decrypted=new TextEncoder().encode(JSON.stringify(scripts));
  const localData={nyc_lyna_trip_v6:JSON.stringify({choices:{}})};
@@ -99,6 +99,9 @@ async function run(){
  const good=await boot('immediate');
  assert(good.nodes.root.childElementCount>0,'Normal unlock renders');
  assert(!good.document.getElementById('noux-emergency-itinerary'),'Normal render has no emergency page');
+ const short=await boot('short');
+ assert(short.nodes.root.childElementCount>0,'Short valid first paint mounts React');
+ assert(!short.document.getElementById('noux-emergency-itinerary'),'Less than 40 initial characters is no longer a false failure');
  const late=await boot('delayed');
  assert(late.nodes.root.childElementCount>0,'React may take longer than 700 milliseconds');
  assert(!late.document.getElementById('noux-emergency-itinerary'),'Delayed render must not create false recovery');
@@ -111,6 +114,8 @@ async function run(){
  assert(emergency.textContent.includes('Booked harbour cruise'),'Emergency view uses actual decrypted schedule');
  assert(emergency.textContent.includes('Test Pier'),'Emergency view offers real place address from private data');
  assert(emergency.textContent.includes('Print / save itinerary'),'Emergency schedule can be saved for travel');
+ assert(!emergency.textContent.includes('synthetic-passphrase-only'),'No passphrase appears in diagnostics');
+ assert(failed.document.getElementById('noux-boot-loading')===null,'Loading mask removed after emergency view opens');
  assert(!emergency.textContent.includes('Reopen the basic itinerary'),'Old loop action removed');
  const basic=await boot('empty',true);
  assert(basic.document.getElementById('noux-emergency-itinerary'),'Previously flagged basic mode also has safe fallback');
