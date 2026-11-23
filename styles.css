@@ -621,3 +621,28 @@ body.noux-final-approved .mainnav button[hidden]{display:none!important}
   }
   #noux-explorer-drawer .noux-explorer-close{min-height:44px;min-width:44px}
 }
+
+/* Render the confirmed local event photograph on top of the legacy React
+   "New York" placeholder, without adding children inside React's DOM.
+   The overlay retains existing thumbnail dimensions and click targets. */
+body.noux-final-approved .timeline .event-thumb.noux-daily-photo-ready:not(img) {
+ position:relative!important;
+ isolation:isolate;
+ overflow:hidden;
+}
+body.noux-final-approved .timeline .event-thumb.noux-daily-photo-ready:not(img)::after {
+ content:"";
+ display:block;
+ position:absolute;
+ inset:0;
+ z-index:4;
+ border-radius:inherit;
+ background-image:var(--noux-daily-photo);
+ background-position:center;
+ background-size:cover;
+ background-repeat:no-repeat;
+ pointer-events:none;
+}
+body.noux-final-approved .timeline .event-thumb.noux-daily-photo-ready:not(img):hover::after {
+ filter:brightness(1.045);
+}

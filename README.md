@@ -149,3 +149,11 @@ The passphrase is held by the owner, never in this repository. For upgrades, enc
 - **Confirmed by the traveller:** Davis Family Butterfly Vivarium (Tue 24, scheduled 10:30), Guggenheim Museum (Tue 24, scheduled 13:30), Hudson VU Rooftop (Tue 24, scheduled 16:30), Mercer Labs (Thu 26, scheduled 11:30). Exact ticket or reservation entry times should be checked against the issued confirmations; no reference numbers are committed.
 - **Waitlisted, not admitted:** Louie Vega at Superior Ingredients, The Room (Wed 25, scheduled 22:00). Registering for a waitlist is not a guaranteed entry ticket. The waiting-list checkbox becomes 'Ticket issued' only after an explicit traveller confirmation of admission, and is never automatically promoted from an old ticket-checkbox record.
 - **Cross-device safety:** default booked statuses ship in the public approved itinerary and booking desk. User-specific existing booking confirmations, waitlist promotion, custom stops, checklists and pairing stay in local browser state and the encrypted shared sync service. No migrations wipe existing values.
+
+## Daily Itinerary photograph renderer · 23 November 2026
+
+The old encrypted React photo component could display a generic "New York" placeholder even though its photo sources existed. The new public **`day-photos.js`** renderer now binds 53/53 approved event IDs individually to 34 related local photographs and paints the actual local image over any React fallback using a CSS-only thumbnail overlay. It does not inject children into React, change the private vault, touch localStorage, or add a button.
+
+This includes travel, hotel check-in/breakfast, confirmed admissions, Pier 79 boarding, the Golden Hour **cruise photo** (distinct from its ferry terminal), the Central Park transfer, the Rockefeller Center transfer, and Friday's airport return. Existing custom stops are excluded from fixed-event image substitution. The release build's `scripts/test_daily_photo_renderer.js` validates real local JPEG files and simulates card-level rendering, mobile day switching and unrelated custom stops.
+
+For the full event-by-event photo list, see [the daily-photo audit](docs/NOUX_DAILY_PHOTOS_2026-11-23.md). Actual iPhone Safari display is not claimed verified until an unlocked-device smoke test. No stored user data should be cleared to update images.

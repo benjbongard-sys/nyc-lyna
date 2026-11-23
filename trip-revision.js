@@ -142,7 +142,7 @@ function finalEvents(day,choices,previous){
   const e={id:x.id,start:x.start,end:x.end,title:x.title,kind:x.kind,status:x.status,
    detail:String(x.detail||''),place:'noux_'+x.place};
   // Expose the same destination photo to renderers that use event-level data.
-  const eventPhoto=approvedPhoto(x.place)||window.NYC_DATA?.P?.[e.place]?.photo;
+  const eventPhoto=window.NOUX_DAILY_PHOTOS?.resolve?.(e.id)?.path||approvedPhoto(x.place)||window.NYC_DATA?.P?.[e.place]?.photo;
   if(typeof eventPhoto==='string'&&eventPhoto)e.photo=eventPhoto;
   if(x.url)e.url=x.url;
   if(['ticket-to-check','hours-to-check','proposed'].includes(x.status)&&window.NOUX_BOOKING_DESK?.confirmed?.(e.id)){

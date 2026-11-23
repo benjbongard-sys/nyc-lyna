@@ -205,6 +205,9 @@
     if(window.NOUX_BOOKING_DESK){try{window.NOUX_BOOKING_DESK.install()}catch(_){}}
     if(window.NOUX_ROUTE_GUIDE){try{window.NOUX_ROUTE_GUIDE.install()}catch(_){}}
     if(window.NOUX_MAP_FILTER){try{window.NOUX_MAP_FILTER.install()}catch(_){}}
+    // Photo overlay is React-safe: it styles existing event thumbnails only.
+    // Mount after first paint, then track changes of the selected day.
+    try{window.NOUX_DAILY_PHOTOS?.install?.()}catch(_){}
     // Recovery/basic mode previously skipped mounting Explore entirely.
     // Initialise read-only after first paint if pre-render installation was
     // skipped, while keeping the newly approved five-day plan immutable.

@@ -4,7 +4,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const {webcrypto}=require('node:crypto'),{TextEncoder,TextDecoder}=require('node:util');
 const week=fs.readFileSync('approved-week.js','utf8');
 const engine=fs.readFileSync('trip-revision.js','utf8');
-new vm.Script(week);new vm.Script(engine);
+const dayPhotos=fs.readFileSync('day-photos.js','utf8');
+new vm.Script(week);new vm.Script(dayPhotos);new vm.Script(engine);
 assert(!/NOUX_PASSPHRASE|132 West 47th|AF007|Benjamin Bongard|Lyna Bongard/.test(week),
  'No private credential, hotel address, or named traveller details are published');
 const win={NYC_DATA:{P:{sanctuary:{name:'Protected Accommodation',address:'PRIVATE',lat:40.7599,lng:-73.9847}},
@@ -27,6 +28,7 @@ const ctx={window:win,document:doc,localStorage:store,crypto:webcrypto,TextEncod
  Uint8Array,atob:x=>Buffer.from(x,'base64').toString('binary'),btoa:x=>Buffer.from(x,'binary').toString('base64'),
  Object,Array,Number,String,Math,JSON,Set,Date};
 vm.runInNewContext(week,ctx,{filename:'approved-week.js'});
+vm.runInNewContext(dayPhotos,ctx,{filename:'day-photos.js'});
 vm.runInNewContext(engine,ctx,{filename:'trip-revision.js'});
 (async()=>{
  const key=await webcrypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);
@@ -38,7 +40,10 @@ vm.runInNewContext(engine,ctx,{filename:'trip-revision.js'});
  assert.equal(win.NYC_DATA.P.noux_pier.photo,'assets/photos/pier79.jpg','Monday pier renders the actual terminal photograph');
  assert.equal(win.NYC_DATA.P.noux_chelsea.photo,'assets/photos/lobsterplace.jpg','Chelsea Market uses Lobster Place imagery');
  assert.equal(win.NYC_PHOTO_INDEX.noux_pier,win.NYC_PHOTO_INDEX.pier79,'Private photo resolver can look up noux_ prefixed places');
- assert.equal(win.NYC_PLAN.day('mon',{}).find(x=>x.id==='approved_20261123_04').photo,'assets/photos/pier79.jpg','Daily event carries correct destination photo');
+ assert.equal(win.NYC_PLAN.day('mon',{}).find(x=>x.id==='approved_20261123_04').photo,'assets/photos/cruise.jpg','Booked cruise shows actual cruise photo, not Pier 79 terminal');
+ assert.equal(win.NYC_PLAN.day('mon',{}).find(x=>x.id==='approved_20261123_03').photo,'assets/photos/pier79.jpg','Boarding instructions use ferry-terminal photo');
+ assert.equal(win.NYC_PLAN.day('tue',{}).find(x=>x.id==='approved_20261124_02').photo,'assets/photos/oak.jpg','Central Park transfer uses park scenery');
+ assert.equal(win.NYC_PLAN.day('fri',{}).find(x=>x.id==='approved_20261127_06').photo,'assets/photos/rockefeller.jpg','Rockefeller transfer does not show unrelated Rough Trade shop');
  assert(win.NYC_DATA.DAYS[2][3].includes('Louie Vega'),'Day headings reflect approved week');
  assert.equal(win.NYC_PLAN.findConflicts().length,0);
  assert.equal(win.NOUX_PLAN_REVISION.decorate(),true);

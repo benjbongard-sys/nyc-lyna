@@ -58,6 +58,7 @@ jobs:
           node scripts/test_final_services.js
           node scripts/test_integrity_audit.js
           node scripts/test_photo_coverage.js
+          node scripts/test_daily_photo_renderer.js
           node scripts/test_map_filter.js
           node scripts/test_explorer_mobile.js
           node scripts/test_offline_worker.js
@@ -87,7 +88,7 @@ jobs:
           MTA_PROXY_URL: ${{ vars.MTA_PROXY_URL || 'https://noux-mta-live.benjbongard.workers.dev' }}
         run: |
           mkdir -p _site
-          cp index.html sw.js unlock.js trip-revision.js approved-week.js booking-desk.js route-guide.js map-filter.js food-wishlist.js food-guide.js decision-guide.js trip-settings-tools.js explorer.js venues.js choice-orchestrator.js day-audit.js departure-kit.js sync-core.js sync.js subway-map.js styles.css manifest.webmanifest robots.txt .nojekyll _site/
+          cp index.html sw.js unlock.js trip-revision.js approved-week.js day-photos.js booking-desk.js route-guide.js map-filter.js food-wishlist.js food-guide.js decision-guide.js trip-settings-tools.js explorer.js venues.js choice-orchestrator.js day-audit.js departure-kit.js sync-core.js sync.js subway-map.js styles.css manifest.webmanifest robots.txt .nojekyll _site/
           cp -a lib assets _site/
           node -e 'require("fs").writeFileSync("_site/worker-config.js", "window.NYC_MTA_PROXY_URL = " + JSON.stringify(process.env.MTA_PROXY_URL || "") + ";\n")'
           python scripts/check_public.py

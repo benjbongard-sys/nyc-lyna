@@ -3,7 +3,7 @@
  * No decryption, passwords, localStorage, live subway feeds or remote API caching.
  */
 'use strict';
-const VERSION='20261123-gugg3';
+const VERSION='20261123-eventphotos4';
 const SHELL='noux-shell-'+VERSION;
 const VAULT='noux-encrypted-vault-'+VERSION;
 const ASSETS=[
@@ -14,7 +14,7 @@ const ASSETS=[
  './subway-map.js?v='+VERSION,'./food-wishlist.js?v='+VERSION,
  './food-guide.js?v='+VERSION,'./decision-guide.js?v='+VERSION,
  './trip-settings-tools.js?v='+VERSION,'./trip-revision.js?v='+VERSION,
- './approved-week.js?v='+VERSION,
+ './approved-week.js?v='+VERSION,'./day-photos.js?v='+VERSION,
  './booking-desk.js?v='+VERSION,'./route-guide.js?v='+VERSION,
  './map-filter.js?v='+VERSION,
  './lib/react.min.js','./lib/react-dom.min.js',
@@ -23,7 +23,7 @@ const ASSETS=[
 ];
 // The illustrated offline pack includes each scheduled destination photograph.
 // No personal uploads, decrypted vault contents or credentials are cached.
-const REQUIRED_PHOTOS=["hotel","jfk","pier79","times","tacos","dear","butterfly","guggenheim","albertine","hudsonvu","bluenote","nypl","bryant","lobsterplace","whitney","little","domino","awoke","stella","mables","superior","grandcentral","mercer","sadies","daydream","colbo","nubeluz","dumbo","bridge","golden","rough"];
+const REQUIRED_PHOTOS=["hotel","jfk","pier79","times","tacos","dear","butterfly","guggenheim","albertine","hudsonvu","bluenote","nypl","bryant","lobsterplace","whitney","little","domino","awoke","stella","mables","superior","grandcentral","mercer","sadies","daydream","colbo","nubeluz","dumbo","bridge","golden","rough","cruise","oak","rockefeller"];
 ASSETS.push(...REQUIRED_PHOTOS.map(key=>'./assets/photos/'+key+'.jpg'));
 const prefix=new URL(self.registration.scope);
 const vaultUrl=new URL('./assets/private.vault.json',prefix);
