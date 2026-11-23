@@ -5,7 +5,7 @@ Scope: **every individual fixed Daily Itinerary event** across Monday to Friday,
 
 ## Root cause and repair
 
-Previously the GitHub Actions photo test checked downloaded assets and location keys, **not the actual `.event-thumb` rendered by the private React app**. The React image component could therefore display the decorative New York placeholder despite successful photo downloads. `day-photos.js` now maps all fixed event IDs explicitly and styles the existing thumbnail (including its old fallback) with the correct, downloaded local asset **after image-load verification**. It never inserts React-managed children or changes personal storage.
+Previously the GitHub Actions photo test checked downloaded assets and location keys, **not the actual `.event-thumb` rendered by the private React app**. The React image component could therefore display the decorative New York placeholder despite successful photo downloads. A follow-up visual check identified that most event rows have **no `.event-thumb` child whatsoever**, so the original photo decorator silently skipped them. `day-photos.js` now maps all fixed event IDs explicitly and applies a loaded photograph to the always-present **`.timeline .event` row**, using its `::after` pseudo-element in the reserved right-hand photo column. It never inserts React-managed children or changes personal storage.
 
 ## Corrected mismatches
 
@@ -101,3 +101,7 @@ Previously the GitHub Actions photo test checked downloaded assets and location 
 - Private custom stops are not assigned an arbitrary fixed-itinerary photograph.
 - The offline pack now includes the three additional event-specific photo files (cruise, Central Park and Rockefeller), as well as every venue photo required by the scheduled plan.
 - A successful build does **not** constitute a real iPhone/Safari visual inspection. Validate after deployment on the actual device without deleting browser data.
+
+## Renderer acceptance after blank-card report
+
+The build regression intentionally simulates missing `.event-thumb` children on every day, including Friday with all thumbnails missing. It verifies that the row itself displays each photograph, handles React day switching, protects custom stops, and clears an old picture when a reused React event row changes to a personal stop. A browser reload must not be required for switching days. The photos are held in same-origin `assets/photos/` files. Actual private React device/browser validation remains distinct from these synthetic tests.

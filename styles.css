@@ -622,27 +622,54 @@ body.noux-final-approved .mainnav button[hidden]{display:none!important}
   #noux-explorer-drawer .noux-explorer-close{min-height:44px;min-width:44px}
 }
 
-/* Render the confirmed local event photograph on top of the legacy React
-   "New York" placeholder, without adding children inside React's DOM.
-   The overlay retains existing thumbnail dimensions and click targets. */
-body.noux-final-approved .timeline .event-thumb.noux-daily-photo-ready:not(img) {
- position:relative!important;
- isolation:isolate;
- overflow:hidden;
-}
-body.noux-final-approved .timeline .event-thumb.noux-daily-photo-ready:not(img)::after {
+/* Mandatory NOUX daily event imagery.
+ * The earlier fix decorated only .event-thumb; most private React cards
+ * never create that optional child. Attach the image to the existing
+ * .event row instead and paint a pseudo-element in the reserved image slot.
+ * No DOM injection, no navigation changes, no extra UI elements.
+ */
+body.noux-final-approved .timeline .event.noux-daily-event-photo::after {
  content:"";
  display:block;
  position:absolute;
- inset:0;
+ top:2px;
+ right:0;
+ width:140px;
+ height:100px;
  z-index:4;
- border-radius:inherit;
- background-image:var(--noux-daily-photo);
+ pointer-events:none;
+ border-radius:10px;
+ border:1px solid rgba(255,255,255,.13);
+ background-color:#292733;
+ background-image:var(--noux-daily-event-photo);
  background-position:center;
  background-size:cover;
  background-repeat:no-repeat;
- pointer-events:none;
+ box-shadow:0 3px 15px rgba(0,0,0,.14);
 }
-body.noux-final-approved .timeline .event-thumb.noux-daily-photo-ready:not(img):hover::after {
- filter:brightness(1.045);
+@media (min-width:721px) and (max-width:1270px) {
+ body.noux-final-approved .timeline .event.noux-daily-event-photo::after {
+  width:95px;
+  height:82px;
+ }
+}
+/* Mobile's original .event-thumb is display:none, so place the image in
+   its own second grid row, below readable text rather than over it. */
+@media (max-width:720px) {
+ body.noux-final-approved .timeline .event.noux-daily-event-photo::after {
+  position:relative;
+  top:auto;
+  right:auto;
+  grid-column:3;
+  grid-row:2;
+  justify-self:start;
+  width:min(230px,100%);
+  height:116px;
+  margin:-16px 0 16px;
+ }
+}
+@media print {
+ body.noux-final-approved .timeline .event.noux-daily-event-photo::after {
+  display:none;
+ }
 }

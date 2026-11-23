@@ -12,10 +12,12 @@ const css=fs.readFileSync('styles.css','utf8');
 const html=fs.readFileSync('index.html','utf8');
 const manifest=JSON.parse(fs.readFileSync('assets/photo-index.json','utf8'));
 const sources=JSON.parse(fs.readFileSync('scripts/photo_sources.json','utf8'));
-assert(css.includes('.event-thumb.noux-daily-photo-ready:not(img)::after'),
-  'CSS must paint a real image over the legacy React placeholder');
-assert(css.includes('background-image:var(--noux-daily-photo)'),
-  'Thumbnail overlay must use the resolved local photo');
+assert(css.includes('.event.noux-daily-event-photo::after'),
+  'CSS must paint the event ROW when React omitted its optional thumbnail');
+assert(css.includes('background-image:var(--noux-daily-event-photo)'),
+  'Event image CSS must use the resolved local photograph');
+assert(css.includes('grid-column:3')&&css.includes('grid-row:2'),
+  'On narrow mobile screens photos are visible without hiding text');
 assert(html.indexOf('./approved-week.js')<html.indexOf('./day-photos.js')&&
   html.indexOf('./day-photos.js')<html.indexOf('./trip-revision.js'),
   'Photo resolver loads after approved week and before the React itinerary adapter');
@@ -34,11 +36,20 @@ class FakeThumb {
  querySelector(sel){return sel==='.no-photo'?this.placeholder:null}
 }
 class FakeRow {
- constructor(event){
-  this.event=event;this.thumb=new FakeThumb();this.isConnected=true;
+ constructor(event,hasThumb=true){
+  this.event=event;this.thumb=hasThumb?new FakeThumb():null;this.isConnected=true;
+  this.dataset={};this.attrs={};this.values={};
+  this.style={
+   setProperty:(k,v)=>{this.values[k]=v},
+   removeProperty:k=>{delete this.values[k]}
+  };
+  const classes=new Set(['event']);
+  this.classList={add:x=>classes.add(x),remove:x=>classes.delete(x),contains:x=>classes.has(x)};
  }
+ setAttribute(k,v){this.attrs[k]=String(v)}
  querySelector(sel){
   if(sel==='.event-thumb')return this.thumb;
+  if(sel==='.event-thumb .no-photo')return this.thumb?.placeholder||null;
   if(sel==='.event-content h3'||sel==='h3')return {textContent:this.event.title};
   if(sel==='.event-time b')return {textContent:this.event.start};
   return null;
@@ -109,20 +120,23 @@ assert.equal(photos.resolve('approved_20261127_07').key,'rough',
 (async()=>{
  for(let i=0;i<5;i++){
   const events=win.NOUX_APPROVED_WEEK.days[dates[i]].events;
-  let rows=events.map(e=>new FakeRow(e));
+  // Reproduce the production screenshot: most rows contain NO .event-thumb.
+  let rows=events.map((e,index)=>new FakeRow(e,index%7===0));
   if(i===1)rows=rows.reverse(); // title matching survives reordered DOM nodes
   const applied=photos.decorateRows(DAYS[i],rows);
   assert.equal(applied.matched,events.length,'Every '+DAYS[i]+' event is matched');
+  assert(applied.missingThumbs>0,'Daily renderer must work without legacy thumb elements');
   await new Promise(resolve=>setImmediate(resolve));
   for(const row of rows){
-   const thumb=row.thumb,rec=photos.resolve(row.event.id);
-   assert(thumb.classList.contains('noux-daily-photo-ready'),
-    'Decorative New York placeholder still active: '+row.event.title);
-   assert.equal(thumb.dataset.nouxPhotoId,row.event.id,'Wrong photograph assigned to '+row.event.title);
-   assert(thumb.values['--noux-daily-photo'].includes('/'+rec.path),
-    'Incorrect thumbnail image URI on '+row.event.title);
-   assert(thumb.attrs['aria-label'].includes(rec.label),
-    'Missing accessible venue photo label '+row.event.title);
+   const rec=photos.resolve(row.event.id);
+   assert(row.classList.contains('noux-daily-event-photo'),
+    'The row has no image painted: '+row.event.title);
+   assert.equal(row.dataset.nouxPhotoId,row.event.id,
+    'Wrong photograph assigned to '+row.event.title);
+   assert(row.values['--noux-daily-event-photo'].includes('/'+rec.path),
+    'Incorrect event photo URI on '+row.event.title);
+   assert(row.attrs['data-noux-photo-credit']!==undefined,
+    'Missing photograph attribution metadata for '+row.event.title);
   }
  }
  // A user-added stop must never steal another event's picture.
@@ -132,25 +146,34 @@ assert.equal(photos.resolve('approved_20261127_07').key,'rough',
  const mixedReport=photos.decorateRows('tue',mixed);
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(mixedReport.matched,original.length,'Custom stop does not displace approved photos');
- assert(!custom.thumb.classList.contains('noux-daily-photo-ready'),'Custom stop must not show an unrelated photo');
+ assert(!custom.classList.contains('noux-daily-event-photo'),'Custom stop must not show an unrelated photo');
  const replacement=original.map(e=>new FakeRow(e));
  const replacingCustom=new FakeRow({id:'custom_replacement',title:'Unscheduled personal visit',start:'12:37'});
  replacement[3]=replacingCustom;
  photos.decorateRows('tue',replacement);
  await new Promise(resolve=>setImmediate(resolve));
- assert(!replacingCustom.thumb.classList.contains('noux-daily-photo-ready'),
-  'Replacing one approved event with a custom stop must not reuse a neighbour photograph');
+ assert(!replacingCustom.classList.contains('noux-daily-event-photo'),
+  'Replacing an approved event with a custom stop must not reuse a neighbour photo');
+ const reused=new FakeRow(original[4],false);
+ photos.decorateRows('tue',[reused]);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert(reused.classList.contains('noux-daily-event-photo'),'Fixture starts with mapped event');
+ reused.event={id:'custom_user_stop',title:'Extra individual stop',start:'13:12'};
+ photos.decorateRows('tue',[reused]);
+ assert(!reused.classList.contains('noux-daily-event-photo'),
+  'A reused React row must clear its old photo when replaced by a personal stop');
+
  assert(photos.install(),'Renderer mounts after successful private React paint');
  assert(observer,'Renderer observes late React rerenders and tab navigation');
- activeDay=4;visibleRows=win.NOUX_APPROVED_WEEK.days[dates[4]].events.map(e=>new FakeRow(e));
+ activeDay=4;visibleRows=win.NOUX_APPROVED_WEEK.days[dates[4]].events.map(e=>new FakeRow(e,false));
  function flush(){let n=0;while(frames.length&&n++<10)frames.shift()()}
  flush();await new Promise(resolve=>setImmediate(resolve));
- assert(visibleRows.every(r=>r.thumb.classList.contains('noux-daily-photo-ready')),
-  'Friday native tab does not retain an empty New York thumbnail');
- activeDay=0;visibleRows=win.NOUX_APPROVED_WEEK.days[dates[0]].events.map(e=>new FakeRow(e));
+ assert(visibleRows.every(r=>r.classList.contains('noux-daily-event-photo')),
+  'Friday native tab must show photos despite missing .event-thumb children');
+ activeDay=0;visibleRows=win.NOUX_APPROVED_WEEK.days[dates[0]].events.map(e=>new FakeRow(e,false));
  for(const fn of listeners.click||[])fn({target:{closest:sel=>sel==='.daytabs .daytab'?{}:null}});
  flush();await new Promise(resolve=>setImmediate(resolve));
- assert(visibleRows.every(r=>r.thumb.classList.contains('noux-daily-photo-ready')),
-  'Day navigation must repaint all Monday event photos');
- console.log('DAILY PHOTO RENDER PASS: 53/53 scheduled events over 5 days have verified local images, correct event identities, rendered thumbnail overlays, and safe navigation.'); 
+ assert(visibleRows.every(r=>r.classList.contains('noux-daily-event-photo')),
+  'Day navigation must repaint all Monday event photos with no thumb elements');
+ console.log('DAILY PHOTO RENDER PASS: 53/53 event photos over 5 days painted on rows even without .event-thumb; responsive CSS and custom-stop safety validated.'); 
 })().catch(err=>{console.error(err);process.exitCode=1});

@@ -130,44 +130,61 @@ function preload(record){
   if(photo.complete&&photo.naturalWidth>0)finish(true);
  });
  loaded.set(url,task);
+ // A first visit while offline must not permanently cache a failed image.
+ // Retry after connectivity returns, without clearing browser storage.
+ void task.then(result=>{if(!result&&loaded.get(url)===task)loaded.delete(url)});
  return task;
+}
+function clearRow(row){
+ if(!row)return;
+ row.classList?.remove('noux-daily-event-photo');
+ row.style?.removeProperty('--noux-daily-event-photo');
+ if(row.dataset){
+  delete row.dataset.nouxPhotoPending;
+  delete row.dataset.nouxPhotoKey;
+  delete row.dataset.nouxPhotoId;
+ }
 }
 function decorateRows(day,rows){
  const events=planned(day);
- if(!events.length||!Array.isArray(rows))return {matched:0,eligible:0};
- let matched=0,eligible=0;
+ if(!events.length||!Array.isArray(rows))return {matched:0,eligible:0,missingThumbs:0};
+ let matched=0,eligible=0,missingThumbs=0;
  rows.forEach((row,index)=>{
-  const thumb=row.querySelector?.('.event-thumb');
-  if(!thumb)return;
+  // A large proportion of legacy React event cards have NO .event-thumb
+  // element at all. The previous implementation skipped those entire rows,
+  // so successful 53/53 asset tests still left blank space on every day.
+  // Paint a pseudo-element on the .event ROW, not on an optional child.
+  if(!row.querySelector?.('.event-thumb'))missingThumbs++;
   const event=eventForRow(row,events,index,rows.length);
   const record=event&&resolve(event.id);
-  if(!record)return;
+  if(!record){clearRow(row);return}
   matched++;
-  if(thumb.dataset?.nouxPhotoKey===record.key&&thumb.classList?.contains('noux-daily-photo-ready')){eligible++;return}
-  if(thumb.dataset){
-   thumb.dataset.nouxPhotoPending=record.key;
-   if(thumb.dataset.nouxPhotoKey!==record.key){
-    thumb.classList?.remove('noux-daily-photo-ready');
-    thumb.style?.removeProperty('--noux-daily-photo');
+  if(row.dataset?.nouxPhotoId===record.eventId&&
+    row.classList?.contains('noux-daily-event-photo')){eligible++;return}
+  if(row.dataset){
+   row.dataset.nouxPhotoPending=record.eventId;
+   if(row.dataset.nouxPhotoId!==record.eventId){
+    row.classList?.remove('noux-daily-event-photo');
+    row.style?.removeProperty('--noux-daily-event-photo');
    }
   }
   void preload(record).then(url=>{
-   if(!url||thumb.isConnected===false||row.isConnected===false||thumb.dataset?.nouxPhotoPending!==record.key)return;
-   if(thumb.tagName==='IMG'){if(thumb.src!==url)thumb.src=url}
-   else thumb.style?.setProperty('--noux-daily-photo','url("'+url+'")');
-   thumb.dataset.nouxPhotoKey=record.key;
-   thumb.dataset.nouxPhotoId=record.eventId;
-   thumb.classList?.add('noux-daily-photo-ready');
-   thumb.setAttribute?.('role','img');
-   thumb.setAttribute?.('aria-label',record.label+' photograph');
-   if(record.credit)thumb.setAttribute?.('title',record.credit+(record.exact?'':' (illustrative image)'));
-   const placeholder=thumb.querySelector?.('.no-photo');
+   if(!url||row.isConnected===false||
+      row.dataset?.nouxPhotoPending!==record.eventId)return;
+   // Only CSS custom properties / classes on existing React nodes are changed.
+   // No element is inserted into, moved within or removed from React's tree.
+   row.style?.setProperty('--noux-daily-event-photo','url("'+url+'")');
+   row.dataset.nouxPhotoId=record.eventId;
+   row.dataset.nouxPhotoKey=record.key;
+   row.classList?.add('noux-daily-event-photo');
+   row.setAttribute?.('data-noux-photo-credit',record.credit);
+   const placeholder=row.querySelector?.('.event-thumb .no-photo');
    placeholder?.setAttribute?.('aria-hidden','true');
    RENDERED++;
   });
   eligible++;
  });
- return {matched,eligible};
+ return {matched,eligible,missingThumbs};
 }
 function selectedDay(){
  const tabs=Array.from(document.querySelectorAll?.('.daytabs .daytab')||[]);
@@ -203,6 +220,7 @@ function install(){
  document.addEventListener('noux:replan',queue);
  window.addEventListener?.('noux:sync-data-arrived',queue);
  window.addEventListener?.('pageshow',queue);
+ window.addEventListener?.('online',queue);
  queue();
  return true;
 }
@@ -215,6 +233,6 @@ function audit(){
 }
 window.NOUX_DAILY_PHOTOS={
  install,refresh,decorateRows,resolve,audit,assigned:EVENT_PHOTOS,
- version:'2026.11.23-daily-photo-renderer1'
+ version:'2026.11.23-daily-photo-renderer2'
 };
 })();
