@@ -99,6 +99,9 @@ function eventForRow(row,events,index,total){
    return name.length>9&&(title.includes(name)||name.includes(title)&&title.length>9);
   });
   if(fuzzy.length===1)return fuzzy[0];
+  // A labelled but unmatched custom stop must NEVER inherit an adjacent photo,
+  // even if it happens to replace one approved row at the same position.
+  return null;
  }
  // Ordinal fallback is allowed only for the exact fixed 53-event schedule,
  // never when personal/custom stops alter row count or order.

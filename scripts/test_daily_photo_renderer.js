@@ -133,6 +133,13 @@ assert.equal(photos.resolve('approved_20261127_07').key,'rough',
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(mixedReport.matched,original.length,'Custom stop does not displace approved photos');
  assert(!custom.thumb.classList.contains('noux-daily-photo-ready'),'Custom stop must not show an unrelated photo');
+ const replacement=original.map(e=>new FakeRow(e));
+ const replacingCustom=new FakeRow({id:'custom_replacement',title:'Unscheduled personal visit',start:'12:37'});
+ replacement[3]=replacingCustom;
+ photos.decorateRows('tue',replacement);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert(!replacingCustom.thumb.classList.contains('noux-daily-photo-ready'),
+  'Replacing one approved event with a custom stop must not reuse a neighbour photograph');
  assert(photos.install(),'Renderer mounts after successful private React paint');
  assert(observer,'Renderer observes late React rerenders and tab navigation');
  activeDay=4;visibleRows=win.NOUX_APPROVED_WEEK.days[dates[4]].events.map(e=>new FakeRow(e));
