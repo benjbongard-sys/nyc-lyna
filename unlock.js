@@ -122,15 +122,20 @@
   const key=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
   return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:rounds,hash:'SHA-256'},key,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
  }
- form.addEventListener('submit',async e=>{
-  e.preventDefault();if(unlocked||!input.value||!crypto?.subtle)return;
-  button.disabled=true;input.disabled=true;document.body.classList.add('unlock-thinking');mark('Opening our New York…');bar.style.width='34%';
-  const password=input.value;input.value='';
+ const rememberChoice=$('remember-device');
+ let busy=false;
+ // Both the manual passphrase and the retained IndexedDB CryptoKey follow
+ // exactly the same AES-GCM verification and React boot path.
+ async function openJourney({password='',savedKey=null,automatic=false,rememberRequested=false}={}){
+  if(unlocked||busy||(!password&&!savedKey)||!crypto?.subtle)return;
+  busy=true;
+  button.disabled=true;input.disabled=true;document.body.classList.add('unlock-thinking');
+  mark(automatic?'Reopening this device…':'Opening our New York…');bar.style.width='34%';
   try{
    if(location.protocol==='file:')throw Error('Open the online NOUX link to continue.');
    const r=await fetch('./assets/private.vault.json',{cache:'no-store'});if(!r.ok)throw Error('Our New York could not open just now. Please try again.');
    const vault=await r.json();
-   const key=await derive(password,b64(vault.salt),vault.iterations);
+   const key=savedKey||await derive(password,b64(vault.salt),vault.iterations);
    bar.style.width='72%';
    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(vault.iv),additionalData:enc.encode('NOUX-NYC-PRIVATE-V1')},key,b64(vault.ct));
    const scripts=JSON.parse(dec.decode(plain));
@@ -140,6 +145,16 @@
     const planReady=await window.NOUX_PLAN_REVISION?.prepare?.({key});
     if(planReady!==true||!window.NOUX_PLAN_REVISION?.active?.())
      throw Error('The approved trip could not be verified. Reconnect and reopen NOUX. Your saved data is unchanged.');
+   // Do not save a passphrase. Only store this origin's verified,
+   // non-extractable AES key when the visitor has opted in on their device.
+   try{window.NOUX_REMEMBER_DEVICE?.activate?.(key)}catch(_){}
+   if(!automatic){
+    if(rememberRequested){
+     try{await window.NOUX_REMEMBER_DEVICE?.remember?.(key)}catch(_){}
+    }else{
+     try{await window.NOUX_REMEMBER_DEVICE?.forget?.()}catch(_){}
+    }
+   }
    unlocked=true;mark('Welcome. The city is opening…','success');bar.style.width='100%';
    screen.classList.add('unlocked');
    await new Promise(resolve=>setTimeout(resolve,1050));
@@ -230,12 +245,40 @@
    window.removeEventListener('unhandledrejection',onVisualError);
    // The password is never persisted, logged or placed in the URL.
   }catch(error){
-   unlocked=false;attempts++;bar.style.width='0%';button.disabled=false;input.disabled=false;
+   unlocked=false;if(!automatic)attempts++;
+   bar.style.width='0%';button.disabled=false;input.disabled=false;
    document.body.classList.remove('unlock-thinking');screen.classList.remove('unlocked');
-   const wrong=error.name==='OperationError';mark(wrong?'That passphrase did not open our journey. Try again.':(error.message||'Unable to open this itinerary.'),'error');
-   screen.classList.remove('shake');void screen.offsetWidth;screen.classList.add('shake');
-   if(wrong&&attempts>=6)mark('Several incorrect attempts. Check the exact private passphrase.','error');
-   input.focus();
-  }
+   const wrong=error.name==='OperationError';
+   if(automatic&&wrong){
+    // A newly encrypted/replaced vault invalidates remembered access.
+    // Never delete choices, sync pairing or the encrypted offline pack.
+    try{await window.NOUX_REMEMBER_DEVICE?.forget?.()}catch(_){}
+   }
+   mark(automatic?
+    (wrong?'Saved device access is no longer valid. Enter your passphrase again.':
+     'Saved access could not open the trip. Enter the passphrase or retry online.'):
+    (wrong?'That passphrase did not open our journey. Try again.':(error.message||'Unable to open this itinerary.')),'error');
+   if(!automatic){
+    screen.classList.remove('shake');void screen.offsetWidth;screen.classList.add('shake');
+    if(wrong&&attempts>=6)mark('Several incorrect attempts. Check the exact private passphrase.','error');
+    input.focus();
+   }
+  }finally{busy=false}
+ }
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(unlocked||busy||!input.value)return;
+  const password=input.value;input.value='';
+  await openJourney({password,rememberRequested:rememberChoice?.checked===true});
  });
+ // iOS Safari may discard background tabs. A reload then reuses the saved
+ // non-extractable CryptoKey instead of requiring the passphrase again.
+ // The user can always type before the asynchronous IndexedDB read finishes.
+ void (async()=>{
+  try{
+   const savedKey=await window.NOUX_REMEMBER_DEVICE?.restore?.();
+   if(savedKey&&!busy&&!unlocked&&!input.value)
+    await openJourney({savedKey,automatic:true});
+  }catch(_){/* IndexedDB blocked / private browsing: normal login stays usable */}
+ })();
 })();

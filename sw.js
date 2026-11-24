@@ -3,12 +3,12 @@
  * No decryption, passwords, localStorage, live subway feeds or remote API caching.
  */
 'use strict';
-const VERSION='20261123-rowphotos5';
+const VERSION='20261124-remember1';
 const SHELL='noux-shell-'+VERSION;
 const VAULT='noux-encrypted-vault-'+VERSION;
 const ASSETS=[
  './','./index.html','./manifest.webmanifest','./styles.css?v='+VERSION,
- './unlock.js?v='+VERSION,'./explorer.js?v='+VERSION,'./venues.js?v='+VERSION,
+ './remember-device.js?v='+VERSION,'./unlock.js?v='+VERSION,'./explorer.js?v='+VERSION,'./venues.js?v='+VERSION,
  './choice-orchestrator.js?v='+VERSION,'./day-audit.js?v='+VERSION,
  './departure-kit.js?v='+VERSION,'./sync-core.js?v='+VERSION,'./sync.js?v='+VERSION,
  './subway-map.js?v='+VERSION,'./food-wishlist.js?v='+VERSION,

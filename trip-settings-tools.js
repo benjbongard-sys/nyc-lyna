@@ -105,6 +105,32 @@ function render(){
   if(typeof window.NOUX_SYNC?.open==='function')window.NOUX_SYNC.open();
   else alert('Shared sync is not available in this browser session. Reopen NOUX online.');
  },'noux-trip-tools-primary'));
+ const device=el('section','noux-trip-tool-row');
+ const persistent=window.NOUX_REMEMBER_DEVICE?.status?.()||{};
+ device.append(el('h3',null,'Stay signed in on this device'));
+ device.append(el('p',null,persistent.remembered?
+  'This private browser can reopen NOUX without the passphrase after Safari closes the tab. Anyone with access to this browser profile can also open it.':
+  'You can keep this private device signed in between browser restarts. The passphrase is never saved.'));
+ if(persistent.remembered){
+  device.append(el('small','noux-trip-tool-state','Remembered access: enabled'));
+  device.append(button('Lock & forget this device',()=>{
+   if(!confirm('Require your passphrase again on this device? This will NOT delete your trip choices, pairing, bookings or offline pack.'))return;
+   void (async()=>{
+    const ok=await window.NOUX_REMEMBER_DEVICE?.forget?.();
+    if(ok)location.reload();
+    else if(OPEN)render();
+   })();
+  },'noux-trip-tools-secondary'));
+ }else if(persistent.canEnable&&persistent.available){
+  device.append(el('small','noux-trip-tool-state','Remembered access: off'));
+  device.append(button('Keep this device signed in',()=>{
+   void (async()=>{
+    await window.NOUX_REMEMBER_DEVICE.remember();
+    if(OPEN)render();
+   })();
+  },'noux-trip-tools-secondary'));
+ }else device.append(el('small','noux-trip-tool-state','Persistent access not available in this browser session'));
+ if(persistent.error)device.append(el('p','noux-trip-tools-error',persistent.error));
  const approved=el('section','noux-trip-tool-row');
  const plan=window.NOUX_PLAN_REVISION?.status?.()||{};
  approved.append(el('h3',null,'Final five-day itinerary'),
@@ -145,7 +171,7 @@ function render(){
   close();window.NOUX_DEPARTURE?.open?.();
  },'noux-trip-tools-secondary'));
  const footer=el('p','noux-trip-tools-fine','This panel appears only inside the Trip Settings flow. No passwords, local choices or bookings are changed by opening it.');
- inner.replaceChildren(header,sync,approved,operations,cache,packing,footer);
+ inner.replaceChildren(header,sync,device,approved,operations,cache,packing,footer);
 }
 function install(){
  if(INSTALLED)return true;

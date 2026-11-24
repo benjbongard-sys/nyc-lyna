@@ -35,9 +35,10 @@ class Element{
 }
 const traverse=n=>[n,...n.nodes.flatMap(traverse)];
 async function boot(mode='immediate',basic=false){
- const nodes=Object.fromEntries(['lock-screen','unlock-form','unlock-pass','unlock-submit','unlock-message','unlock-bar','lock-stars','toggle-visibility','root'].map(x=>[x,new Element('div',x)]));
+ const nodes=Object.fromEntries(['lock-screen','unlock-form','unlock-pass','unlock-submit','unlock-message','unlock-bar','lock-stars','toggle-visibility','remember-device','root'].map(x=>[x,new Element('div',x)]));
  const browser={time:0,delay:mode==='delayed'};
  nodes.root.clock=browser;
+ nodes['remember-device'].checked=mode!=='no-remember';
  const body=new Element('body'),head=new Element('head'),events={};
  const scripts={
   'data.js':"window.NYC_DATA={P:{pier:{address:'Test Pier, New York, NY, USA'}},DEFAULT:{},CHOICES:[]};",
@@ -61,7 +62,14 @@ async function boot(mode='immediate',basic=false){
  const sessionStorage={
   getItem:k=>sessionData[k]||null,setItem:(k,v)=>{sessionData[k]=v},removeItem:k=>{delete sessionData[k]}
  };
+ const rememberedState={storedKey:{name:'synthetic-indexeddb-key'},saved:0,forgot:0,restored:0,activated:0};
  const win={
+  NOUX_REMEMBER_DEVICE:{
+   activate(key){rememberedState.activated++;return true},
+   remember:async key=>{rememberedState.saved++;return true},
+   restore:async()=>{rememberedState.restored++;return ['remembered','stale-remembered'].includes(mode)?rememberedState.storedKey:null},
+   forget:async()=>{rememberedState.forgot++;return true}
+  },
   addEventListener(k,f){(events[k]??=[]).push(f)},
   removeEventListener(k,f){events[k]=(events[k]||[]).filter(v=>v!==f)},
   fire(k){(events[k]||[]).forEach(f=>f({type:k}))},
@@ -79,7 +87,14 @@ async function boot(mode='immediate',basic=false){
  let context;
  head.appendChild=n=>{if(n.tagName==='script')vm.runInContext(n.textContent,context);return n};
  const location={href:'https://example.org/nyc-lyna/',protocol:'https:',search:basic?'?basic=1':'',reload(){this.reloaded=true}};
- const crypto={subtle:{importKey:async()=>({}),deriveKey:async()=>({}),decrypt:async()=>decrypted}};
+ const crypto={subtle:{importKey:async()=>({}),
+   deriveKey:async()=>{browser.derived=(browser.derived||0)+1;return {}},
+   decrypt:async(_args,key)=>{
+    if(mode==='stale-remembered'&&key===rememberedState.storedKey){
+     const error=new Error('Stale saved access');error.name='OperationError';throw error;
+    }
+    return decrypted;
+   }}};
  const fetch=async()=>({ok:true,json:async()=>({salt:'',iv:'',ct:'',iterations:10000})});
  class VirtualDate extends Date{static now(){browser.time+=300;return browser.time}}
  const history={replaceState(){history.replaced=true}};
@@ -92,16 +107,36 @@ async function boot(mode='immediate',basic=false){
   CustomEvent:class{},MutationObserver:undefined};
  context=vm.createContext(ctx);
  vm.runInContext(source,context,{filename:'unlock.js'});
- nodes['unlock-pass'].value='synthetic-passphrase-only';
- await nodes['unlock-form'].listeners.submit({preventDefault(){}});
- await Promise.all(timers);
- await Promise.resolve();
- return {nodes,document,window:win,location,sessionStorage,body,browser};
+ if(mode==='remembered'||mode==='stale-remembered'){
+  // The remembered key is recovered asynchronously when the site first opens.
+  for(let i=0;i<40;i++)await Promise.resolve();
+  await Promise.all(timers);
+  for(let i=0;i<20;i++)await Promise.resolve();
+ }else{
+  nodes['unlock-pass'].value='synthetic-passphrase-only';
+  await nodes['unlock-form'].listeners.submit({preventDefault(){}});
+  await Promise.all(timers);
+  await Promise.resolve();
+ }
+ return {nodes,document,window:win,location,sessionStorage,body,browser,rememberedState};
 }
 async function run(){
  const good=await boot('immediate');
  assert(good.nodes.root.childElementCount>0,'Normal unlock renders');
  assert(!good.document.getElementById('noux-emergency-itinerary'),'Normal render has no emergency page');
+ assert.equal(good.rememberedState.saved,1,'One successful passphrase unlock remembers this private device by default');
+ assert(good.rememberedState.activated,'Successful manual login retains a key only in memory until opted in');
+ const noRemember=await boot('no-remember');
+ assert.equal(noRemember.rememberedState.saved,0,'Unchecking stay signed in does not persist device access');
+ assert.equal(noRemember.rememberedState.forgot,1,'Unchecking the option clears previous remembered access only');
+ const auto=await boot('remembered');
+ assert(auto.nodes.root.childElementCount>0,'A restarted Safari tab reopens using the remembered key');
+ assert.equal(auto.browser.derived||0,0,'Automatic reopening never derives a key from a stored passphrase');
+ assert.equal(auto.rememberedState.saved,0,'Automatic reopening does not rewrite saved credentials');
+ const stale=await boot('stale-remembered');
+ assert.equal(stale.rememberedState.forgot,1,'Only an invalid retained key is discarded');
+ assert.equal(stale.nodes['unlock-pass'].disabled,false,'After stale-device failure the passphrase field is enabled');
+ assert(/passphrase/i.test(stale.nodes['unlock-message'].textContent),'Stale key failure prompts for normal passphrase');
  const short=await boot('short');
  assert(short.nodes.root.childElementCount>0,'Short valid first paint mounts React');
  assert(!short.document.getElementById('noux-emergency-itinerary'),'Less than 40 initial characters is no longer a false failure');

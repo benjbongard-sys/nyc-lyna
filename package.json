@@ -4,7 +4,7 @@
   "private": true,
   "description": "GitHub Pages-ready React trip planner with choices and real-time MTA train arrivals",
   "scripts": {
-    "test": "node scripts/test_integrity_audit.js && node scripts/test_direct_plan.js && node scripts/test_map_filter.js && node scripts/test_explorer_mobile.js && node scripts/test_unlock_recovery.js && node scripts/test_sync_core.js"
+    "test": "node scripts/test_integrity_audit.js && node scripts/test_direct_plan.js && node scripts/test_map_filter.js && node scripts/test_explorer_mobile.js && node scripts/test_unlock_recovery.js && node scripts/test_remember_device.js && node scripts/test_trip_settings_tools.js && node scripts/test_sync_core.js"
   },
   "dependencies": {
     "react": "18.3.1",

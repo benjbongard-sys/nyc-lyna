@@ -39,7 +39,9 @@ const doc={body,createElement:t=>new Node(t),
 };
 const w={NYC_DATA:{P:{}},innerWidth:1200,addEventListener(){},
  NOUX_SYNC:{getStatus:()=>({paired:true,text:'Shared trip synced'}),open:()=>{syncOpened++}},
- NOUX_DEPARTURE:{open:()=>{departureOpened++}}};
+ NOUX_DEPARTURE:{open:()=>{departureOpened++}},
+ NOUX_REMEMBER_DEVICE:{status:()=>({remembered:true,available:true,canEnable:true}),
+  forget:async()=>true}};
 const ctx={window:w,document:doc,navigator:{},MutationObserver:undefined,
  requestAnimationFrame:fn=>{raf.push(fn);return raf.length},
  setTimeout:fn=>{fn();return 1},clearTimeout(){},confirm:()=>true,alert:()=>{},CustomEvent:class{},MessageChannel:class{}};
@@ -67,6 +69,10 @@ const panel=doc.getElementById('noux-trip-tools');
 assert(panel.textContent.includes('Our shared trip'),'Shared sync is in Trip Settings tools');
 assert(panel.textContent.includes('Offline essentials'),'Offline moved into Settings');
 assert(panel.textContent.includes('Departure & gifts'),'Departure link moved into Settings');
+assert(panel.textContent.includes('Stay signed in on this device'),'Remembered session controls are inside existing Settings');
+assert(panel.textContent.includes('Remembered access: enabled'),'Stored access status is explicit');
+assert(flatten(panel).some(x=>x.tagName==='button'&&x.textContent==='Lock & forget this device'),
+ 'The user can disable automatic unlock without clearing trip data');
 flatten(panel).find(x=>x.tagName==='button'&&x.textContent==='Manage shared sync').click();
 assert.equal(syncOpened,1,'Settings opens the existing encrypted sync panel');
 w.NOUX_TRIP_TOOLS.open();

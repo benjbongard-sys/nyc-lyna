@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 root=Path('_site')
-required=['index.html','unlock.js','explorer.js','food-wishlist.js','food-guide.js','decision-guide.js','trip-settings-tools.js','trip-revision.js','approved-week.js','day-photos.js','booking-desk.js','route-guide.js','map-filter.js','sw.js','venues.js','choice-orchestrator.js','day-audit.js','departure-kit.js','sync-core.js','sync.js','styles.css','assets/private.vault.json','assets/photo-index.js','assets/photos/skyline.jpg']
+required=['index.html','unlock.js','remember-device.js','explorer.js','food-wishlist.js','food-guide.js','decision-guide.js','trip-settings-tools.js','trip-revision.js','approved-week.js','day-photos.js','booking-desk.js','route-guide.js','map-filter.js','sw.js','venues.js','choice-orchestrator.js','day-audit.js','departure-kit.js','sync-core.js','sync.js','styles.css','assets/private.vault.json','assets/photo-index.js','assets/photos/skyline.jpg']
 for f in required:
  assert (root/f).is_file(),f'Missing required offline asset {f}'
 vault=json.loads((root/'assets/private.vault.json').read_text())
@@ -13,7 +13,7 @@ for f in [root/'index.html',root/'unlock.js']:
  text=f.read_text()
  for bad in ['132 W 47th','Sanctuary Hotel','2026-11-23','Ben & Lyna','River Café']:
   assert bad not in text, f'Private itinerary string leaked into {f.name}: {bad}'
-for f in [root/'day-audit.js',root/'day-photos.js',root/'departure-kit.js',root/'sync-core.js',root/'sync.js',root/'decision-guide.js',root/'trip-settings-tools.js',root/'trip-revision.js',root/'booking-desk.js',root/'route-guide.js']:
+for f in [root/'remember-device.js',root/'day-audit.js',root/'day-photos.js',root/'departure-kit.js',root/'sync-core.js',root/'sync.js',root/'decision-guide.js',root/'trip-settings-tools.js',root/'trip-revision.js',root/'booking-desk.js',root/'route-guide.js']:
  text=f.read_text()
  for bad in ['private.vault.json','NOUX_PASSPHRASE','Sanctuary Hotel','132 W 47th','AF007']:
   assert bad not in text,f'Private booking detail leaked in {f.name}: {bad}'

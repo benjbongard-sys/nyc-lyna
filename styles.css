@@ -673,3 +673,9 @@ body.noux-final-approved .timeline .event.noux-daily-event-photo::after {
   display:none;
  }
 }
+
+/* Private device access: opt-in checkbox inside the existing lock screen. */
+.lock-card .remember-device-option{display:flex;align-items:center;gap:10px;justify-content:flex-start;cursor:pointer;color:#f1d6ac;font:600 12px/1.4 system-ui,sans-serif;letter-spacing:normal;margin:14px 0 5px;text-align:left}
+.lock-card .remember-device-option input{flex:none;width:18px;height:18px;accent-color:#e6c38e;cursor:pointer}
+.lock-card .remember-device-note{text-align:left;font:10px/1.55 system-ui,sans-serif;color:#c0b6af;max-width:none;margin:0 0 4px}
+@media(max-height:480px) and (orientation:landscape){.lock-card .remember-device-option{margin-top:7px}.lock-card .remember-device-note{font-size:9px;line-height:1.35}}
