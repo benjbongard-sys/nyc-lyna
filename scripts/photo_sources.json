@@ -351,10 +351,12 @@
   "pier79": {
     "label": "Pier 79 · NY Waterway W 39th Street terminal",
     "urls": [
+      "https://upload.wikimedia.org/wikipedia/commons/c/c9/West_Midtown_Ferry_term_jeh.jpg",
+      "https://hudsonriverpark.org/app/uploads/2020/05/Pier-79-HRPK-SENES-Art-1440x960.jpg",
       "https://nywaterway.com/UserFiles/Images/2024/TerminalPhotos/Midtown_terminal_photo.jpg"
     ],
-    "credit": "NY Waterway · official Midtown terminal photograph",
-    "source": "https://www.nywaterway.com/midtownw39thterminal.aspx",
+    "credit": "Jim.henderson / Wikimedia Commons (CC0) · alternate official Hudson River Park or NY Waterway photograph",
+    "source": "https://commons.wikimedia.org/wiki/File:West_Midtown_Ferry_term_jeh.jpg",
     "exact": true
   },
   "jfk": {
