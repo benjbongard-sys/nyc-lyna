@@ -3,7 +3,7 @@
  * No decryption, passwords, localStorage, live subway feeds or remote API caching.
  */
 'use strict';
-const VERSION='20261124-remember1';
+const VERSION='20261126-finalroute2';
 const SHELL='noux-shell-'+VERSION;
 const VAULT='noux-encrypted-vault-'+VERSION;
 const ASSETS=[
@@ -23,7 +23,7 @@ const ASSETS=[
 ];
 // The illustrated offline pack includes each scheduled destination photograph.
 // No personal uploads, decrypted vault contents or credentials are cached.
-const REQUIRED_PHOTOS=["hotel","jfk","pier79","times","tacos","dear","butterfly","guggenheim","albertine","hudsonvu","bluenote","nypl","bryant","lobsterplace","whitney","little","domino","awoke","stella","mables","superior","grandcentral","mercer","sadies","daydream","colbo","nubeluz","dumbo","bridge","golden","rough","cruise","oak","rockefeller"];
+const REQUIRED_PHOTOS=["hotel","jfk","pier79","times","tacos","dear","butterfly","guggenheim","albertine","hudsonvu","bluenote","nypl","bryant","lobsterplace","whitney","little","domino","awoke","stella","mables","superior","grandcentral","mercer","sadies","daydream","colbo","nubeluz","dumbo","bridge","golden","rough","cruise","oak","rockefeller","arte"];
 ASSETS.push(...REQUIRED_PHOTOS.map(key=>'./assets/photos/'+key+'.jpg'));
 const prefix=new URL(self.registration.scope);
 const vaultUrl=new URL('./assets/private.vault.json',prefix);

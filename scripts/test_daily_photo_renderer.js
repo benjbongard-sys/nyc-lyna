@@ -1,5 +1,5 @@
-/* Strict NOUX photograph audit: 53 EVENT identities, local file bytes and
- * DOM thumbnail rendering, not merely a source manifest or 32 location keys.
+/* Strict NOUX photograph audit: 56 EVENT identities, local file bytes and
+ * DOM thumbnail rendering, not merely a source manifest or 30 location keys.
  * The React private vault and the traveller's passphrase are not accessed.
  */
 'use strict';
@@ -87,10 +87,10 @@ vm.runInNewContext(week,ctx,{filename:'approved-week.js'});
 vm.runInNewContext(moduleCode,ctx,{filename:'day-photos.js'});
 const photos=win.NOUX_DAILY_PHOTOS;
 const all=dates.flatMap(date=>win.NOUX_APPROVED_WEEK.days[date].events);
-assert.equal(all.length,53,'Final schedule has exactly 53 events');
+assert.equal(all.length,56,'Final schedule has exactly 56 events');
 const audit=photos.audit();
-assert.equal(audit.scheduled,53,'Audit covers every event, not just the distinct places');
-assert.equal(audit.mapped,53,'Every event has an explicit image assignment');
+assert.equal(audit.scheduled,56,'Audit covers every event, not just the distinct places');
+assert.equal(audit.mapped,56,'Every event has an explicit image assignment');
 assert.deepEqual([...audit.missing],[],'No scheduled event lacks a photo mapping');
 assert.deepEqual([...audit.unexpected],[],'No orphaned old itinerary mapping');
 const forbidden=new Set(['skyline','diner','food','rooftop','gallery','magic','somewhere','jazz']);
@@ -113,10 +113,10 @@ assert.equal(photos.resolve('approved_20261124_02').key,'oak',
  'Central Park transfer shows actual park imagery, not Guggenheim exterior');
 assert.equal(photos.resolve('approved_20261124_03').key,'guggenheim',
  'The museum itself keeps its Guggenheim photograph');
-assert.equal(photos.resolve('approved_20261127_06').key,'rockefeller',
- 'Transfer to Rockefeller Center must not show a record shop');
-assert.equal(photos.resolve('approved_20261127_07').key,'rough',
- 'Rough Trade shopping should show Rough Trade');
+assert.equal(photos.resolve('approved_20261126_11').key,'arte','ARTE museum must have a real distinct photo');
+assert.equal(photos.resolve('approved_20261127_12').key,'albertine','Moved Albertine photo');
+assert.equal(photos.resolve('approved_20261127_14').key,'awoke','Moved Awoke photo');
+assert.equal(photos.resolve('approved_20261127_16').key,'stella','Moved Stella photo');
 (async()=>{
  for(let i=0;i<5;i++){
   const events=win.NOUX_APPROVED_WEEK.days[dates[i]].events;
@@ -175,5 +175,5 @@ assert.equal(photos.resolve('approved_20261127_07').key,'rough',
  flush();await new Promise(resolve=>setImmediate(resolve));
  assert(visibleRows.every(r=>r.classList.contains('noux-daily-event-photo')),
   'Day navigation must repaint all Monday event photos with no thumb elements');
- console.log('DAILY PHOTO RENDER PASS: 53/53 event photos over 5 days painted on rows even without .event-thumb; responsive CSS and custom-stop safety validated.'); 
+ console.log('DAILY PHOTO RENDER PASS: 56/56 event photos over 5 days painted on rows even without .event-thumb; responsive CSS and custom-stop safety validated.'); 
 })().catch(err=>{console.error(err);process.exitCode=1});

@@ -11,7 +11,7 @@ const storage={getItem:k=>state[k]||null,setItem:(k,v)=>state[k]=String(v)};
 for(const name of files)vm.runInNewContext(source(name),{window:win,localStorage:storage,document:{},Object,Array,String,Set,Map,JSON,Date,Math,Number,Intl},{filename:name});
 const plan=win.NOUX_APPROVED_WEEK,booking=win.NOUX_BOOKING_DESK,food=win.NOUX_FOOD_WISHLIST,route=win.NOUX_ROUTE_GUIDE;
 const dates={mon:'2026-11-23',tue:'2026-11-24',wed:'2026-11-25',thu:'2026-11-26',fri:'2026-11-27'};
-assert.equal(plan.revision,'2026-11-23-guggenheim-booked','Approved fixed-route revision');
+assert.equal(plan.revision,'2026-11-26-arte-and-friday-recovery','Approved fixed-route revision');
 assert.equal(Object.keys(plan.days).length,5,'Exactly five approved days');
 const all=[],seen=new Set(),missing=[],timeErrors=[];
 const mins=t=>Number(t.slice(0,2))*60+Number(t.slice(3,5));
@@ -42,7 +42,16 @@ assert(friday.some(e=>/DUMBO/i.test(e.title))&&friday.some(e=>/Walk Brooklyn Bri
 assert(!friday.some(e=>/sunrise|weather.day/i.test(e.title)),'No legacy sunrise/alternative on Friday');
 assert(friday.find(e=>/Golden Diner/.test(e.title)),'Friday lunch stays fixed');
 const thursday=plan.days[dates.thu].events;
-assert(thursday.some(e=>/Mercer Labs/.test(e.title))&&thursday.some(e=>/DAYDREAM/.test(e.title)),'Both selected immersive exhibitions Thursday');
+assert(thursday.some(e=>/Mercer Labs/.test(e.title))&&thursday.some(e=>e.id==='approved_20261126_11'&&e.place==='arte'&&e.status==='ticket-to-check'),'Mercer Labs retained; ARTE added with a new independent unconfirmed ticket');
+assert(!thursday.some(e=>e.place==='daydream'),'Replaced DAYDREAM is no longer scheduled');
+assert(!plan.days[dates.tue].events.some(e=>e.place==='albertine'),'Missed Tuesday Albertine is not duplicated');
+assert(!plan.days[dates.wed].events.some(e=>['awoke','stella'].includes(e.place)),'Missed Wednesday thrift shops are not duplicated');
+assert.deepEqual(Array.from(friday.filter(e=>['culture','shopping'].includes(e.kind)),e=>e.place),['albertine','awoke','stella'],'Friday recovery order: Albertine then Williamsburg thrift shops');
+assert(friday.find(e=>e.id==='approved_20261127_12').start==='10:00'&&friday.find(e=>e.id==='approved_20261127_16').start==='12:00','Respect Albertine and Stella opening hours');
+assert(friday.find(e=>e.id==='approved_20261127_17').start==='15:35'&&friday.find(e=>e.id==='approved_20261127_08').start==='16:15','Protect departure buffer');
+assert(!tracked.some(b=>b.id==='approved_20261126_05'),'Retired DAYDREAM ticket never aliases ARTE admission');
+assert.equal(plan.places.arte.address,'61 Chelsea Piers, New York, NY 10011, USA');
+assert(/flood|storm/i.test(thursday.find(e=>e.place==='arte'&&e.kind==='museum').detail),'Storm access warning accompanies new attraction');
 const confirmEvent=id=>all.find(e=>e.id===id);
 for(const [id,label] of [
  ['approved_20261124_01','Butterfly Vivarium'],['approved_20261124_03','Guggenheim'],['approved_20261124_06','Hudson VU'],
@@ -73,4 +82,5 @@ assert(foodCatalog.every(x=>x.address&&x.website&&x.hours),'Every Food profile h
 const publicSrc=source('approved-week.js');
 for(const secret of ['NOUX_PASSPHRASE','Sanctuary Hotel','132 West 47th','AF007','Benjamin Bongard','Lyna Bongard'])
  assert(!publicSrc.includes(secret),'Public source leaked protected travel detail '+secret);
-console.log('NO UX integrity PASS: 53 approved schedule events, five mapped days, all route notes, 16 matching booking entries and 15 food profiles.');
+assert.equal(all.length,56);
+console.log('NO UX integrity PASS: '+all.length+' approved schedule events, five mapped days, '+tracked.length+' matching booking entries, 15 food profiles and protected Friday departure.');

@@ -33,7 +33,8 @@ for(const place of referenced){
   'Missing photo source for '+place);
 }
 assert.equal(missing.length,0,'Scheduled images missing: '+missing.join('; '));
-assert.equal(referenced.size,32,'All 32 unique approved scheduled destinations have photographs');
+assert.equal(referenced.size,30,'All 30 unique approved scheduled destinations have photographs');
+assert(covered.find(x=>x.place==='arte'&&x.key==='arte').ready,'ARTE Museum photograph successfully downloaded');
 assert.equal(schedule.places.pier.name,'Pier 79 · Slip 2 · NY Waterway');
 assert(covered.find(x=>x.place==='pier'&&x.key==='pier79').ready,'Cruise pier uses actual terminal image');
 assert(covered.find(x=>x.place==='chelsea'&&x.key==='lobsterplace').ready,'Chelsea lunch uses Lobster Place, not an art gallery image');

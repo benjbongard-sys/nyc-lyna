@@ -16,10 +16,12 @@ const ITEMS=[
  ['wed','13','Louie Vega · Superior Ingredients · 22:00','waitlist','ON WAITLIST: request registered, but entry is NOT guaranteed. Do not mark as admitted until a valid ticket is issued. The Room is indoors, not the rooftop.','https://ra.co/events/2567360'],
  ['thu','03','Mercer Labs · 11:30','booked','Admission booked according to traveller; 11:30 remains the planned visit time. Check the ticket for the exact entry slot.','https://mercerlabs.com/'],
  ['thu','04',"Sadie's Seaport · 13:20",'reservation','Thanksgiving brunch announced 10:00–15:00; table not yet confirmed.','https://www.sadies.nyc/'],
- ['thu','05','DAYDREAM · Balloon Museum · 14:30','ticket','Thanksgiving-week programme advertised; select admission.','https://tickets.balloonmuseum.world/newyork/'],
- ['thu','07','Colbo Next Door · 17:00','hours','Thanksgiving opening is unverified; keep conditional.','https://shop.colbo.nyc/'],
+ ['thu','11','ARTE MUSEUM · 14:50 (storm conditional)','ticket','Official holiday hours 10:00–21:00, last entry 19:30. No admission purchased; old DAYDREAM confirmation cannot be reused. Confirm safe access to Chelsea Piers before booking.','https://newyork.artemuseum.com/visit'],
  ['thu','09','Nubeluz · 19:30','reservation','Preferred rooftop table; not booked yet.','https://www.nubeluzbyjose.com/'],
- ['fri','05','Golden Diner · 13:00','reservation','Prioritised for lunch; verify direct holiday opening and allow for queues.','https://www.goldendinerny.com/dine'],
+ ['fri','12','Villa Albertine / Albertine Books · 10:00','hours','Regular Friday opening 10:00–18:00; Black Friday hours must be verified. Bookshop access only; other mansion rooms not guaranteed.','https://www.albertine.com/about-us/'],
+ ['fri','14','Awoke Vintage · 11:20','hours','Regular Friday hours 10:00–21:00; verify holiday hours. 132 North 5th Street.','https://www.awokevintage.com/pages/visit-us'],
+ ['fri','16','10 ft Single by Stella Dallas · 12:00','hours','Regular Friday opening around noon; verify Black Friday hours by calling +1 718-486-9487.','https://theshopkeepers.com/shops/10-ft-single-by-stella-dallas/brooklyn-store/'],
+ ['fri','05','Golden Diner · 15:05','reservation','Preferred late lunch, not booked. No time for a long queue. Leave Lower Manhattan by 15:35 to protect airport transfer.','https://resy.com/cities/new-york-ny/venues/golden-diner'],
  ['fri','09','Group coach · around 17:00','arranged','Arranged travel; precise lobby pickup is subject to organiser.',''],
  ['fri','10','Return flight · 21:30','booked','Flight departure already arranged.','']
 ];

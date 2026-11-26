@@ -11,7 +11,7 @@ const DATES={mon:'2026-11-23',tue:'2026-11-24',wed:'2026-11-25',thu:'2026-11-26'
 const enc=new TextEncoder();
 // A named, locally bundled photo for each approved stop. Logistical entries
 // reuse the image of their actual destination rather than a random skyline.
-const APPROVED_PHOTO_KEYS={"hotel":"hotel","jfk":"jfk","pier":"pier79","times":"times","tacos":"tacos","dear":"dear","amnh":"butterfly","gugg":"guggenheim","albertine":"albertine","hudsonvu":"hudsonvu","blue":"bluenote","nypl":"nypl","bryant":"bryant","chelsea":"lobsterplace","whitney":"whitney","little":"little","domino":"domino","awoke":"awoke","stella":"stella","mables":"mables","superior":"superior","grand":"grandcentral","mercer":"mercer","sadies":"sadies","daydream":"daydream","colbo":"colbo","wildones":"wildones","nubeluz":"nubeluz","dumbo":"dumbo","bridge_bk":"bridge","bridge_mh":"bridge","golden":"golden","rough":"rough"};
+const APPROVED_PHOTO_KEYS={"hotel":"hotel","jfk":"jfk","pier":"pier79","times":"times","tacos":"tacos","dear":"dear","amnh":"butterfly","gugg":"guggenheim","albertine":"albertine","hudsonvu":"hudsonvu","blue":"bluenote","nypl":"nypl","bryant":"bryant","chelsea":"lobsterplace","whitney":"whitney","little":"little","domino":"domino","awoke":"awoke","stella":"stella","mables":"mables","superior":"superior","grand":"grandcentral","mercer":"mercer","sadies":"sadies","daydream":"daydream","colbo":"colbo","wildones":"wildones","nubeluz":"nubeluz","dumbo":"dumbo","bridge_bk":"bridge","bridge_mh":"bridge","golden":"golden","rough":"rough","arte":"arte"};
 function approvedPhoto(id){
  const key=APPROVED_PHOTO_KEYS[id];
  const meta=key&&window.NYC_PHOTO_INDEX?.[key];
@@ -93,12 +93,15 @@ function legsFor(events){
  for(let i=1;i<v.length;i++){
   const from=v[i-1],to=v[i],a=p[from.place],b=p[to.place],km=distance(a,b);
   if(!Number.isFinite(km)||km<0.07)continue;
-  const mode=a.kind==='airport'||b.kind==='airport'?'driving':km<=1.05?'walking':'transit';
-  const across=/brooklyn/i.test(a.area||'')!==/brooklyn/i.test(b.area||'');
+  const crossing=from.place==='noux_bridge_bk'&&to.place==='noux_bridge_mh';
+  const explicitWalk=to.kind==='walk'&&(crossing||/^(?:walk to|walk brooklyn bridge)/i.test(to.title||''));
+  const mode=a.kind==='airport'||b.kind==='airport'?'driving':(explicitWalk||km<=1.05)?'walking':'transit';
+  const inBrooklyn=place=>/brooklyn|williamsburg|dumbo/i.test(place.area||'');
+  const across=inBrooklyn(a)!==inBrooklyn(b);
   const estimate=mode==='driving'?Math.max(45,Math.min(105,Math.ceil(36+km*1.6))):
    mode==='walking'?Math.max(3,Math.ceil(km*1.32/4.6*60)+2):
    Math.max(16,Math.min(78,Math.ceil(14+km*4.6+(across?9:0))));
-  let slack=to.kind==='travel'?minutes(to.end)-minutes(to.start):minutes(to.start)-minutes(from.end);
+  let slack=to.kind==='travel'||explicitWalk?minutes(to.end)-minutes(to.start):minutes(to.start)-minutes(from.end);
   if(slack< -720)slack+=1440;
   out.push({from,to,km:Math.round(km*100)/100,mode,estimate,slack,
    warning:slack+4<estimate?'tight':'ok',source:'geographic estimate, not live'});
@@ -208,10 +211,10 @@ function install(){
  if(Array.isArray(DATA.DAYS)){
   const headings={
    mon:'Harbour cruise, Times Square and cocktails',
-   tue:'Butterflies, art, Villa Albertine and live soul',
-   wed:'Chelsea, Williamsburg vintage and Louie Vega',
-   thu:'Grand Central, immersive art and listening lounge',
-   fri:'DUMBO, Brooklyn Bridge, Golden Diner and departure'
+   tue:'Butterflies, Guggenheim and live soul',
+   wed:'Chelsea, Williamsburg and Louie Vega',
+   thu:'Mercer Labs and ARTE Museum · storm conditional',
+   fri:'Villa Albertine, Williamsburg vintage, DUMBO and departure'
   };
   for(const row of DATA.DAYS)if(Array.isArray(row)&&headings[row[0]])row[3]=headings[row[0]];
  }
@@ -220,10 +223,10 @@ function install(){
  // as new decisions or extra compulsory day stops.
  if(Array.isArray(DATA.WISHES)){
   const extras=[
-   ['ARTE MUSEUM · immersive digital art','art','','choice'],
+   ['ARTE MUSEUM · immersive digital art','art','thu','core'],
    ['Colbo Next Door · listening bar and natural wine','music','','choice'],
    ['Only The Wild Ones · listening lounge','music','','choice'],
-   ['DAYDREAM · Balloon Museum','art','thu','core'],
+   ['DAYDREAM · Balloon Museum','art','','choice'],
    ['Mercer Labs · art and technology','art','thu','core'],
    ['West Village · neighbourhood walk','culture','','choice']
   ];
@@ -234,12 +237,12 @@ function install(){
   }
  }
  // Reflect chosen stops in the existing native wishlist. Keep any other
- // traveller-created wishes; the optional ARTE MUSEUM remains unassigned.
+ // traveller-created wishes; ARTE is scheduled, DAYDREAM and Rough Trade remain optional.
  if(Array.isArray(DATA.WISHES)){
   const curated=[
    [['butterfly vivarium'],'Butterfly Vivarium','art','tue'],
    [['guggenheim'],'Guggenheim Museum','art','tue'],
-   [['villa albertine','albertine books'],'Villa Albertine & Albertine Books','culture','tue'],
+   [['villa albertine','albertine books'],'Villa Albertine & Albertine Books','culture','fri'],
    [['hudson vu'],'Hudson VU Rooftop','view','tue'],
    [['reuben james','blue note'],'Reuben James · Blue Note','music','tue'],
    [['nypl','new york public library'],'NYPL Schwarzman Building','culture','wed'],
@@ -249,18 +252,17 @@ function install(){
    [['whitney'],'Whitney Museum','art','wed'],
    [['little island'],'Little Island','culture','wed'],
    [['domino park'],'Domino Park','view','wed'],
-   [['awoke vintage'],'Awoke Vintage','culture','wed'],
-   [['stella dallas','10 ft single'],'Stella Dallas vintage','culture','wed'],
+   [['awoke vintage'],'Awoke Vintage','culture','fri'],
+   [['stella dallas','10 ft single'],'Stella Dallas vintage','culture','fri'],
    [['louie vega'],'Louie Vega · Flashback','music','wed'],
    [['grand central'],'Grand Central Terminal','culture','thu'],
    [['mercer labs'],'Mercer Labs','art','thu'],
    [['sadie s','sadies'],'Sadie’s Seaport','food','thu'],
-   [['daydream','balloon museum'],'DAYDREAM · Balloon Museum','art','thu'],
+   [['arte museum'],'ARTE MUSEUM · immersive digital art','art','thu'],
    [['nubeluz'],'Nubeluz','view','thu'],
    [['dumbo'],'DUMBO Waterfront','view','fri'],
    [['brooklyn bridge'],'Brooklyn Bridge · daytime crossing','view','fri'],
-   [['golden diner'],'Golden Diner','food','fri'],
-   [['rough trade'],'Rough Trade Below','culture','fri']
+   [['golden diner'],'Golden Diner','food','fri']
   ];
   const norm=t=>String(t||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   for(const [aliases,title,category,day] of curated){
@@ -268,6 +270,13 @@ function install(){
     !/\bsunrise\b/i.test(String(row[0]))&&aliases.some(a=>norm(row[0]).includes(norm(a))));
    if(found){found[2]=day;found[3]='core'}
    else DATA.WISHES.push([title,category,day,'core']);
+  }
+ }
+ // Retired core activities remain discoverable but are not compulsory stops.
+ if(Array.isArray(DATA.WISHES)){
+  for(const w of DATA.WISHES){
+   if(!Array.isArray(w))continue;
+   if(/daydream|balloon museum|rough trade|colbo next door/i.test(String(w[0]))){w[2]='';w[3]='choice'}
   }
  }
  // All five days were approved. Archive obsolete itinerary decision cards.

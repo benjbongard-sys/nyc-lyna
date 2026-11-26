@@ -9,59 +9,62 @@
 if(window.NOUX_DAILY_PHOTOS)return;
 const DAY_DATES={mon:'2026-11-23',tue:'2026-11-24',wed:'2026-11-25',thu:'2026-11-26',fri:'2026-11-27'};
 const EVENT_PHOTOS=Object.freeze({
- approved_20261123_00:'jfk',
- approved_20261123_01:'hotel',
- approved_20261123_02:'pier79',
- approved_20261123_03:'pier79',
- approved_20261123_04:'cruise',
- approved_20261123_05:'times',
- approved_20261123_06:'tacos',
- approved_20261123_07:'dear',
- approved_20261124_00:'hotel',
- approved_20261124_01:'butterfly',
- approved_20261124_02:'oak',
- approved_20261124_03:'guggenheim',
- approved_20261124_04:'albertine',
- approved_20261124_05:'hudsonvu',
- approved_20261124_06:'hudsonvu',
- approved_20261124_07:'bluenote',
- approved_20261124_08:'bluenote',
- approved_20261124_09:'bluenote',
- approved_20261125_00:'hotel',
- approved_20261125_01:'nypl',
- approved_20261125_02:'bryant',
- approved_20261125_03:'lobsterplace',
- approved_20261125_04:'lobsterplace',
- approved_20261125_05:'whitney',
- approved_20261125_06:'little',
- approved_20261125_07:'domino',
- approved_20261125_08:'domino',
- approved_20261125_09:'awoke',
- approved_20261125_10:'stella',
- approved_20261125_11:'mables',
- approved_20261125_12:'domino',
- approved_20261125_13:'superior',
- approved_20261126_00:'hotel',
- approved_20261126_01:'grandcentral',
- approved_20261126_02:'mercer',
- approved_20261126_03:'mercer',
- approved_20261126_04:'sadies',
- approved_20261126_05:'daydream',
- approved_20261126_06:'colbo',
- approved_20261126_07:'colbo',
- approved_20261126_08:'nubeluz',
- approved_20261126_09:'nubeluz',
- approved_20261127_00:'hotel',
- approved_20261127_01:'dumbo',
- approved_20261127_02:'dumbo',
- approved_20261127_03:'bridge',
- approved_20261127_04:'bridge',
- approved_20261127_05:'golden',
- approved_20261127_06:'rockefeller',
- approved_20261127_07:'rough',
- approved_20261127_08:'hotel',
- approved_20261127_09:'hotel',
- approved_20261127_10:'jfk'
+ "approved_20261123_00": "jfk",
+ "approved_20261123_01": "hotel",
+ "approved_20261123_02": "pier79",
+ "approved_20261123_03": "pier79",
+ "approved_20261123_04": "cruise",
+ "approved_20261123_05": "times",
+ "approved_20261123_06": "tacos",
+ "approved_20261123_07": "dear",
+ "approved_20261124_00": "hotel",
+ "approved_20261124_01": "butterfly",
+ "approved_20261124_02": "oak",
+ "approved_20261124_03": "guggenheim",
+ "approved_20261124_05": "hudsonvu",
+ "approved_20261124_06": "hudsonvu",
+ "approved_20261124_07": "bluenote",
+ "approved_20261124_08": "bluenote",
+ "approved_20261124_09": "bluenote",
+ "approved_20261125_00": "hotel",
+ "approved_20261125_01": "nypl",
+ "approved_20261125_02": "bryant",
+ "approved_20261125_03": "lobsterplace",
+ "approved_20261125_04": "lobsterplace",
+ "approved_20261125_05": "whitney",
+ "approved_20261125_06": "little",
+ "approved_20261125_07": "domino",
+ "approved_20261125_08": "domino",
+ "approved_20261125_11": "mables",
+ "approved_20261125_12": "domino",
+ "approved_20261125_13": "superior",
+ "approved_20261126_00": "hotel",
+ "approved_20261126_01": "grandcentral",
+ "approved_20261126_02": "mercer",
+ "approved_20261126_03": "mercer",
+ "approved_20261126_04": "sadies",
+ "approved_20261126_10": "arte",
+ "approved_20261126_11": "arte",
+ "approved_20261126_12": "hotel",
+ "approved_20261126_13": "hotel",
+ "approved_20261126_08": "nubeluz",
+ "approved_20261126_09": "nubeluz",
+ "approved_20261127_00": "hotel",
+ "approved_20261127_11": "albertine",
+ "approved_20261127_12": "albertine",
+ "approved_20261127_13": "awoke",
+ "approved_20261127_14": "awoke",
+ "approved_20261127_15": "stella",
+ "approved_20261127_16": "stella",
+ "approved_20261127_01": "dumbo",
+ "approved_20261127_02": "dumbo",
+ "approved_20261127_03": "bridge",
+ "approved_20261127_04": "bridge",
+ "approved_20261127_05": "golden",
+ "approved_20261127_17": "hotel",
+ "approved_20261127_08": "hotel",
+ "approved_20261127_09": "hotel",
+ "approved_20261127_10": "jfk"
 });
 const VALID_PATH=/^assets\/photos\/[a-z0-9_-]+\.jpg$/;
 const loaded=new Map();
@@ -103,7 +106,7 @@ function eventForRow(row,events,index,total){
   // even if it happens to replace one approved row at the same position.
   return null;
  }
- // Ordinal fallback is allowed only for the exact fixed 53-event schedule,
+ // Ordinal fallback is allowed only for the exact fixed approved schedule,
  // never when personal/custom stops alter row count or order.
  if(total===events.length)return events[index]||null;
  return null;
@@ -135,6 +138,22 @@ function preload(record){
  void task.then(result=>{if(!result&&loaded.get(url)===task)loaded.delete(url)});
  return task;
 }
+
+function setRowDirections(row,event,events){
+ const index=events.findIndex(e=>e.id===event.id);
+ if(index<1)return;
+ const prev=events[index-1];
+ if(prev.place===event.place)return;
+ const plan=window.NYC_PLAN;
+ if(!plan?.routeUrl)return;
+ const mode=(event.place==='bridge_mh'&&prev.place==='bridge_bk')||/^(?:walk to|walk brooklyn bridge)/i.test(event.title||'')?'walking':'transit';
+ const url=plan.routeUrl('noux_'+prev.place,'noux_'+event.place,mode);
+ if(!url||!/^https:\/\/www\.google\.com\/maps\/dir\//.test(url))return;
+ for(const link of row.querySelectorAll?.('a[href]')||[]){
+  if(!/directions/i.test(link.textContent||'')||!/google\.com\/maps\/dir\//i.test(link.href||''))continue;
+  if(link.href!==url)link.href=url;
+ }
+}
 function clearRow(row){
  if(!row)return;
  row.classList?.remove('noux-daily-event-photo');
@@ -156,6 +175,7 @@ function decorateRows(day,rows){
   // Paint a pseudo-element on the .event ROW, not on an optional child.
   if(!row.querySelector?.('.event-thumb'))missingThumbs++;
   const event=eventForRow(row,events,index,rows.length);
+  if(event)setRowDirections(row,event,events);
   const record=event&&resolve(event.id);
   if(!record){clearRow(row);return}
   matched++;
@@ -233,6 +253,6 @@ function audit(){
 }
 window.NOUX_DAILY_PHOTOS={
  install,refresh,decorateRows,resolve,audit,assigned:EVENT_PHOTOS,
- version:'2026.11.23-daily-photo-renderer2'
+ version:'2026.11.26-daily-photo-renderer3'
 };
 })();

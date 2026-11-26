@@ -524,5 +524,16 @@
     "credit": "BrooklynBridgeWalkwayCrowd photographer · Wikimedia Commons (reuse terms at source)",
     "source": "https://commons.wikimedia.org/wiki/File:BrooklynBridgeWalkwayCrowd.jpg",
     "exact": true
+  },
+  "arte": {
+    "label": "ARTE Museum New York · Beach Aurora / immersive installations",
+    "urls": [
+      "https://d21buns5ku92am.cloudfront.net/69537/images/601638-Copy%20of%20%E2%98%85BEACH%20AURORA_Arte%20Museum%20New%20York-c20b68-original-1752673034.jpg",
+      "https://media.feverup.com/image/upload/v1759502603/IMG_1862_qqelvo.jpg",
+      "https://applications-media.feverup.com/image/upload/f_auto%2Cw_720%2Ch_720/fever2/plan/photo/978514ba-5db5-11f0-97d7-9ef24b211f9a.jpg"
+    ],
+    "credit": "ARTE Museum New York / d’strict / Fever official venue and exhibition photography",
+    "source": "https://newsroom.feverup.com/en-US/252217-arte-museum-new-york-opening-at-chelsea-piers-september-1/",
+    "exact": true
   }
 }
